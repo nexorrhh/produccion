@@ -1,0 +1,232 @@
+.pv-error-banner {
+  background: var(--red-bg);
+  border: 1px solid var(--cim-border);
+  color: var(--red);
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+/* ALERTAS */
+.pv-alertas {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.pv-alertas-ok {
+  font-size: 13px;
+  color: var(--green);
+  font-weight: 600;
+}
+.pv-alerta-chip {
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 20px;
+}
+.pv-alerta-vencida {
+  background: var(--red-bg);
+  color: var(--red);
+  border: 1px solid var(--cim-border);
+}
+.pv-alerta-nueva {
+  background: var(--amber-bg);
+  color: var(--amber);
+  border: 1px solid #fde68a;
+}
+
+/* TABLA */
+.pv-table-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.pv-table-container table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.pv-table-container thead th {
+  background: var(--bg-soft);
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.pv-table-container thead th.center {
+  text-align: center;
+}
+.pv-table-container tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+.pv-table-container tbody td.center {
+  text-align: center;
+}
+.pv-table-container tbody tr:last-child td {
+  border-bottom: none;
+}
+.pv-table-container tbody tr:hover td {
+  background: #fafcfe;
+}
+.pv-table-container tbody tr.pv-row-alerta td {
+  background: var(--red-bg);
+}
+.pv-table-container tbody tr.pv-row-alerta:hover td {
+  background: #fde8e8;
+}
+
+.pv-legajo-num {
+  display: inline-block;
+  font-family: 'Consolas', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+  background: var(--bg-soft);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+.pv-nombre-main {
+  font-weight: 600;
+}
+
+.pv-vacio {
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--text2);
+  font-size: 13px;
+}
+
+/* ESTADO badges */
+.pv-estado-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.pv-vigente {
+  background: var(--green-bg);
+  color: var(--green);
+  border: 1px solid var(--green-bd);
+}
+.pv-nueva_pendiente {
+  background: var(--bg-soft);
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
+.pv-vencida_nunca,
+.pv-vencida_confirmar {
+  background: var(--red-bg);
+  color: var(--red);
+  border: 1px solid var(--cim-border);
+}
+
+/* PANEL */
+.pv-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  z-index: 100;
+  overflow-y: auto;
+}
+.pv-panel {
+  width: 100%;
+  max-width: 560px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 24px;
+}
+.pv-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.pv-panel-nombre {
+  font-size: 16px;
+  font-weight: 700;
+}
+.pv-panel-sub {
+  font-size: 12.5px;
+  color: var(--text2);
+  margin-top: 2px;
+}
+.pv-panel-estado {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 12px;
+  background: var(--bg-soft);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+}
+.pv-panel-fecha {
+  font-size: 12.5px;
+  color: var(--text2);
+  flex: 1;
+}
+
+.pv-panel-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.pv-detalle-fila {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.pv-detalle-puesto {
+  flex: 1;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.pv-detalle-fila select {
+  padding: 6px 8px;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.pv-agregar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.pv-agregar select,
+.pv-agregar input {
+  padding: 8px 10px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  font-size: 13px;
+}
+.pv-agregar-error {
+  width: 100%;
+  font-size: 12.5px;
+  color: var(--red);
+}

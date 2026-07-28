@@ -1,5 +1,6 @@
 import { OperativosPage } from '../modules/operativos/OperativosPage'
 import { BusquedaPersonalPage } from '../modules/busqueda-personal/BusquedaPersonalPage'
+import { PolivalenciaPage } from '../modules/polivalencia/PolivalenciaPage'
 
 // Registro central de módulos habilitados. Agregar o sacar un módulo del
 // panel es agregar/sacar una entrada acá — no hay que tocar Sidebar,
@@ -16,5 +17,11 @@ export const moduleRegistry = [
     label: 'Búsqueda de Personal',
     path: '/busqueda-personal',
     element: <BusquedaPersonalPage />,
+  },
+  {
+    key: 'polivalencia',
+    label: 'Polivalencia',
+    path: '/polivalencia',
+    element: <PolivalenciaPage />,
   },
 ]
