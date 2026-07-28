@@ -28,7 +28,32 @@ export function AuthProvider({ children }) {
     if (error) throw new Error('No se pudo validar el PIN: ' + error.message)
     if (!data || !data.length) throw new Error('PIN incorrecto')
 
-    const loggedUser = data[0]
+    return applyLogin(data[0])
+  }
+
+  // Perfiles activos que todavía no definieron su PIN (para el selector de
+  // "Crear mi PIN"). Nunca expone si ya tiene pin ni su valor.
+  async function listarSinPin() {
+    const { data, error } = await supabase.rpc('produccion_usuarios_sin_pin')
+    if (error) throw new Error('No se pudo cargar la lista de perfiles: ' + error.message)
+    return data || []
+  }
+
+  // Define el PIN por primera vez para un perfil. La función en Supabase
+  // solo lo permite si ese perfil todavía no tiene uno, así cada persona
+  // lo elige una única vez, sin que nadie más lo vea ni lo defina.
+  async function crearPin(id, pin) {
+    const { data, error } = await supabase.rpc('produccion_crear_pin', {
+      p_id: id,
+      p_pin: pin,
+    })
+    if (error) throw new Error(error.message)
+    if (!data || !data.length) throw new Error('No se pudo crear el PIN')
+
+    return applyLogin(data[0])
+  }
+
+  function applyLogin(loggedUser) {
     setUser(loggedUser)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(loggedUser))
     return loggedUser
@@ -40,7 +65,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, listarSinPin, crearPin }}>
       {children}
     </AuthContext.Provider>
   )

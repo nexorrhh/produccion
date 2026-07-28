@@ -20,6 +20,33 @@
   gap: 14px;
 }
 
+.login-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.login-tabs {
+  display: flex;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.login-tabs button {
+  flex: 1;
+  padding: 9px 10px;
+  border: none;
+  background: var(--surface);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text2);
+}
+.login-tabs button.active {
+  background: var(--com);
+  color: #fff;
+}
+
 .login-brand {
   display: flex;
   align-items: center;
@@ -75,6 +102,20 @@
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
+.login-select {
+  padding: 9px 12px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  font-size: 14px;
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+}
+.login-select:focus {
+  border-color: var(--com);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
 .login-error {
   font-size: 12.5px;
   font-weight: 600;
@@ -83,6 +124,21 @@
   border: 1px solid var(--cim-border);
   border-radius: var(--radius);
   padding: 8px 12px;
+}
+
+.login-ok {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--green);
+  background: var(--green-bg);
+  border: 1px solid var(--green-bd);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+}
+
+.login-hint {
+  font-size: 13px;
+  color: var(--text2);
 }
 
 .login-submit {
