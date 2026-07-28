@@ -4,6 +4,7 @@ import { Toolbar } from './components/Toolbar'
 import { OperativosTable } from './components/OperativosTable'
 import { ActionBar } from './components/ActionBar'
 import { Toast } from '../../app/components/Toast'
+import { AnalisisOperativos } from './analisis/AnalisisOperativos'
 import { useOperativosData } from './hooks/useOperativosData'
 import { useCitacionDeFecha } from './hooks/useCitacionDeFecha'
 import { key, tipoPago } from './lib/clasificacion'
@@ -27,6 +28,7 @@ export function OperativosPage() {
   const [vista, setVista] = useState('todos')
   const [guardando, setGuardando] = useState(false)
   const [toast, setToast] = useState(null)
+  const [vistaPrincipal, setVistaPrincipal] = useState('citar')
 
   const {
     seleccion,
@@ -129,45 +131,60 @@ export function OperativosPage() {
 
   return (
     <div className="wrap">
-      <div className="op-status-line">
-        <span className={'op-status-dot ' + status} />
-        {statusText}
+      <div className="op-tabs">
+        <button className={vistaPrincipal === 'citar' ? 'active' : ''} onClick={() => setVistaPrincipal('citar')}>
+          Citar
+        </button>
+        <button className={vistaPrincipal === 'analisis' ? 'active' : ''} onClick={() => setVistaPrincipal('analisis')}>
+          Análisis
+        </button>
       </div>
 
-      <SetupBar
-        fecha={fecha}
-        onFechaChange={handleFechaChange}
-        tipo={tipo}
-        onTipoChange={setTipo}
-        dia={dia}
-        counters={counters}
-      />
+      {vistaPrincipal === 'analisis' ? (
+        <AnalisisOperativos />
+      ) : (
+        <>
+          <div className="op-status-line">
+            <span className={'op-status-dot ' + status} />
+            {statusText}
+          </div>
 
-      <Toolbar filtros={filtros} onFiltrosChange={setFiltros} puestos={puestos} vista={vista} onVistaChange={setVista} />
+          <SetupBar
+            fecha={fecha}
+            onFechaChange={handleFechaChange}
+            tipo={tipo}
+            onTipoChange={setTipo}
+            dia={dia}
+            counters={counters}
+          />
 
-      <OperativosTable
-        empleados={empleados}
-        mapaClasif={mapaClasif}
-        cumplimiento={cumplimiento}
-        seleccion={seleccion}
-        filtros={filtros}
-        vista={vista}
-        onToggleCitar={toggleCitar}
-        onSetTurno={setTurno}
-        onSetCampo={setCampo}
-      />
+          <Toolbar filtros={filtros} onFiltrosChange={setFiltros} puestos={puestos} vista={vista} onVistaChange={setVista} />
 
-      <ActionBar
-        estadoTexto={estadoTexto}
-        citadosCount={Object.keys(seleccion).length}
-        onLimpiar={handleLimpiar}
-        onCopiarUltima={handleCopiarUltima}
-        onExportarCSV={handleExportarCSV}
-        onGuardar={handleGuardar}
-        guardando={guardando}
-      />
+          <OperativosTable
+            empleados={empleados}
+            mapaClasif={mapaClasif}
+            cumplimiento={cumplimiento}
+            seleccion={seleccion}
+            filtros={filtros}
+            vista={vista}
+            onToggleCitar={toggleCitar}
+            onSetTurno={setTurno}
+            onSetCampo={setCampo}
+          />
 
-      <Toast toast={toast} />
+          <ActionBar
+            estadoTexto={estadoTexto}
+            citadosCount={Object.keys(seleccion).length}
+            onLimpiar={handleLimpiar}
+            onCopiarUltima={handleCopiarUltima}
+            onExportarCSV={handleExportarCSV}
+            onGuardar={handleGuardar}
+            guardando={guardando}
+          />
+
+          <Toast toast={toast} />
+        </>
+      )}
     </div>
   )
 }
