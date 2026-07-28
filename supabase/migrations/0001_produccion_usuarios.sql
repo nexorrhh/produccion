@@ -19,22 +19,22 @@ create table if not exists produccion_usuarios (
 -- las cuales expone el pin de nadie.
 alter table produccion_usuarios enable row level security;
 
--- Perfiles activos que todavía NO definieron su PIN. La app usa esto para
--- ofrecer "Crear mi PIN" — solo expone nombre, nunca si el pin existe con
--- qué valor.
-create or replace function produccion_usuarios_sin_pin()
-returns table (id uuid, nombre_apellido text)
+-- Perfiles activos, para la grilla "¿Quién está usando este portal?".
+-- Expone si cada uno ya tiene PIN o no (para mostrar el badge "Crear PIN"),
+-- pero nunca el valor del pin.
+create or replace function produccion_listar_usuarios()
+returns table (id uuid, nombre_apellido text, tiene_pin boolean)
 language sql
 security definer
 set search_path = public
 as $$
-  select id, nombre_apellido
+  select id, nombre_apellido, (pin is not null) as tiene_pin
   from produccion_usuarios
-  where pin is null and activo = true
+  where activo = true
   order by nombre_apellido;
 $$;
 
-grant execute on function produccion_usuarios_sin_pin() to anon;
+grant execute on function produccion_listar_usuarios() to anon;
 
 -- Define el PIN por primera vez. Solo funciona si ese perfil todavía no
 -- tiene uno (pin is null) — así cada persona elige el suyo una sola vez,
@@ -66,11 +66,13 @@ $$;
 
 grant execute on function produccion_crear_pin(uuid, text) to anon;
 
--- Verifica el PIN en el login normal y devuelve el usuario (sin el pin) si
--- matchea y está activo. SECURITY DEFINER: corre con permisos del dueño de
--- la función, no con los del rol anon, por eso puede leer la tabla aunque
--- RLS la tenga cerrada para todo lo demás.
-create or replace function produccion_verificar_pin(p_pin text)
+-- Verifica el PIN de un perfil puntual (ya elegido en la grilla) y devuelve
+-- el usuario (sin el pin) si matchea. SECURITY DEFINER: corre con permisos
+-- del dueño de la función, no con los del rol anon, por eso puede leer la
+-- tabla aunque RLS la tenga cerrada para todo lo demás. Se verifica contra
+-- un id puntual (no contra todos los pin de la tabla) para que dos personas
+-- no puedan terminar logueadas por coincidencia si eligieran el mismo PIN.
+create or replace function produccion_verificar_pin(p_id uuid, p_pin text)
 returns table (id uuid, nombre_apellido text, rol text)
 language sql
 security definer
@@ -78,10 +80,10 @@ set search_path = public
 as $$
   select id, nombre_apellido, rol
   from produccion_usuarios
-  where pin = p_pin and activo = true;
+  where id = p_id and pin = p_pin and activo = true;
 $$;
 
-grant execute on function produccion_verificar_pin(text) to anon;
+grant execute on function produccion_verificar_pin(uuid, text) to anon;
 
 -- Perfiles iniciales (sección 4 de CLAUDE.md), sin PIN — cada uno lo
 -- define la primera vez que entra, desde "Crear mi PIN".

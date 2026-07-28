@@ -21,8 +21,9 @@ export function AuthProvider({ children }) {
     setLoading(false)
   }, [])
 
-  async function login(pin) {
+  async function login(id, pin) {
     const { data, error } = await supabase.rpc('produccion_verificar_pin', {
+      p_id: id,
       p_pin: pin,
     })
     if (error) throw new Error('No se pudo validar el PIN: ' + error.message)
@@ -31,10 +32,11 @@ export function AuthProvider({ children }) {
     return applyLogin(data[0])
   }
 
-  // Perfiles activos que todavía no definieron su PIN (para el selector de
-  // "Crear mi PIN"). Nunca expone si ya tiene pin ni su valor.
-  async function listarSinPin() {
-    const { data, error } = await supabase.rpc('produccion_usuarios_sin_pin')
+  // Perfiles activos para la grilla "¿Quién está usando este portal?".
+  // Expone si cada uno ya tiene PIN (para el badge "Crear PIN"), nunca su
+  // valor.
+  async function listarUsuarios() {
+    const { data, error } = await supabase.rpc('produccion_listar_usuarios')
     if (error) throw new Error('No se pudo cargar la lista de perfiles: ' + error.message)
     return data || []
   }
@@ -65,7 +67,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, listarSinPin, crearPin }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, listarUsuarios, crearPin }}>
       {children}
     </AuthContext.Provider>
   )

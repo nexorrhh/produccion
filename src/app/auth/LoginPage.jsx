@@ -3,10 +3,29 @@ import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './useAuth'
 import './login.css'
 
+function iniciales(nombreApellido) {
+  const [apellido, nombre] = (nombreApellido || '').split(',').map((s) => s.trim())
+  const a = (apellido || '')[0] || ''
+  const n = (nombre || '')[0] || ''
+  return (a + n).toUpperCase()
+}
+
 export function LoginPage() {
-  const { user } = useAuth()
+  const { user, listarUsuarios } = useAuth()
   const location = useLocation()
-  const [modo, setModo] = useState('ingresar') // ingresar | crear
+  const [usuarios, setUsuarios] = useState(null)
+  const [error, setError] = useState('')
+  const [seleccionado, setSeleccionado] = useState(null)
+
+  useEffect(() => {
+    let cancelled = false
+    listarUsuarios()
+      .then((data) => !cancelled && setUsuarios(data))
+      .catch((err) => !cancelled && setError(err.message))
+    return () => {
+      cancelled = true
+    }
+  }, [listarUsuarios])
 
   if (user) {
     const from = location.state?.from?.pathname || '/'
@@ -29,22 +48,41 @@ export function LoginPage() {
           </div>
         </div>
 
-        <div className="login-tabs">
-          <button className={modo === 'ingresar' ? 'active' : ''} onClick={() => setModo('ingresar')} type="button">
-            Ingresar
-          </button>
-          <button className={modo === 'crear' ? 'active' : ''} onClick={() => setModo('crear')} type="button">
-            Crear mi PIN
-          </button>
-        </div>
+        {error && <div className="login-error">{error}</div>}
 
-        {modo === 'ingresar' ? <IngresarForm /> : <CrearPinForm onListo={() => setModo('ingresar')} />}
+        {!seleccionado ? (
+          <PersonGrid usuarios={usuarios} onElegir={setSeleccionado} />
+        ) : seleccionado.tiene_pin ? (
+          <PinEntryForm usuario={seleccionado} onVolver={() => setSeleccionado(null)} />
+        ) : (
+          <CrearPinForm usuario={seleccionado} onVolver={() => setSeleccionado(null)} />
+        )}
       </div>
     </div>
   )
 }
 
-function IngresarForm() {
+function PersonGrid({ usuarios, onElegir }) {
+  if (!usuarios) return <div className="login-hint">Cargando…</div>
+  if (!usuarios.length) return <div className="login-hint">No hay perfiles activos.</div>
+
+  return (
+    <>
+      <div className="login-label login-grid-title">¿Quién está usando este portal?</div>
+      <div className="person-grid">
+        {usuarios.map((u) => (
+          <button key={u.id} className="person-card" onClick={() => onElegir(u)} type="button">
+            <span className="person-avatar">{iniciales(u.nombre_apellido)}</span>
+            <span className="person-name">{u.nombre_apellido}</span>
+            {!u.tiene_pin && <span className="person-badge">Crear PIN</span>}
+          </button>
+        ))}
+      </div>
+    </>
+  )
+}
+
+function PinEntryForm({ usuario, onVolver }) {
   const { login } = useAuth()
   const [pin, setPin] = useState('')
   const [error, setError] = useState('')
@@ -59,7 +97,7 @@ function IngresarForm() {
     setLoading(true)
     setError('')
     try {
-      await login(pin)
+      await login(usuario.id, pin)
     } catch (err) {
       setError(err.message)
       setPin('')
@@ -70,6 +108,8 @@ function IngresarForm() {
 
   return (
     <form onSubmit={handleSubmit}>
+      <PersonaSeleccionada usuario={usuario} onVolver={onVolver} />
+
       <label className="login-label" htmlFor="pin">
         PIN de acceso
       </label>
@@ -94,37 +134,16 @@ function IngresarForm() {
   )
 }
 
-function CrearPinForm({ onListo }) {
-  const { listarSinPin, crearPin } = useAuth()
-  const [perfiles, setPerfiles] = useState(null)
-  const [perfilId, setPerfilId] = useState('')
+function CrearPinForm({ usuario, onVolver }) {
+  const { crearPin } = useAuth()
   const [pin, setPin] = useState('')
   const [confirmar, setConfirmar] = useState('')
   const [error, setError] = useState('')
-  const [ok, setOk] = useState('')
   const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    let cancelled = false
-    listarSinPin()
-      .then((data) => {
-        if (cancelled) return
-        setPerfiles(data)
-        if (data.length === 1) setPerfilId(data[0].id)
-      })
-      .catch((err) => !cancelled && setError(err.message))
-    return () => {
-      cancelled = true
-    }
-  }, [listarSinPin])
 
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
-    if (!perfilId) {
-      setError('Elegí tu nombre')
-      return
-    }
     if (pin.length !== 4) {
       setError('El PIN tiene 4 dígitos')
       return
@@ -135,8 +154,7 @@ function CrearPinForm({ onListo }) {
     }
     setLoading(true)
     try {
-      await crearPin(perfilId, pin)
-      setOk('Listo, entrando…')
+      await crearPin(usuario.id, pin)
     } catch (err) {
       setError(err.message)
       setPin('')
@@ -146,23 +164,9 @@ function CrearPinForm({ onListo }) {
     }
   }
 
-  if (perfiles && perfiles.length === 0) {
-    return <div className="login-hint">No quedan perfiles sin PIN por definir.</div>
-  }
-
   return (
     <form onSubmit={handleSubmit}>
-      <label className="login-label" htmlFor="perfil">
-        Tu nombre
-      </label>
-      <select id="perfil" className="login-select" value={perfilId} onChange={(e) => setPerfilId(e.target.value)}>
-        <option value="">{perfiles ? 'Elegí tu nombre…' : 'Cargando…'}</option>
-        {(perfiles || []).map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.nombre_apellido}
-          </option>
-        ))}
-      </select>
+      <PersonaSeleccionada usuario={usuario} onVolver={onVolver} />
 
       <label className="login-label" htmlFor="nuevo-pin">
         Elegí tu PIN (nadie más lo va a ver)
@@ -176,6 +180,7 @@ function CrearPinForm({ onListo }) {
         maxLength={4}
         value={pin}
         onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+        autoFocus
       />
 
       <label className="login-label" htmlFor="confirmar-pin">
@@ -193,11 +198,22 @@ function CrearPinForm({ onListo }) {
       />
 
       {error && <div className="login-error">{error}</div>}
-      {ok && <div className="login-ok">{ok}</div>}
 
       <button className="btn btn-primary login-submit" type="submit" disabled={loading}>
         {loading ? 'Guardando…' : 'Crear PIN y entrar'}
       </button>
     </form>
+  )
+}
+
+function PersonaSeleccionada({ usuario, onVolver }) {
+  return (
+    <div className="persona-seleccionada">
+      <span className="person-avatar small">{iniciales(usuario.nombre_apellido)}</span>
+      <span className="persona-seleccionada-nombre">{usuario.nombre_apellido}</span>
+      <button type="button" className="btn btn-ghost persona-volver" onClick={onVolver}>
+        Cambiar
+      </button>
+    </div>
   )
 }
