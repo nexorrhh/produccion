@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { AlertasBar } from './components/AlertasBar'
 import { PersonasTable } from './components/PersonasTable'
 import { MatrizPersonaPanel } from './components/MatrizPersonaPanel'
+import { AnalisisPolivalencia } from './components/AnalisisPolivalencia'
 import { Toast } from '../../app/components/Toast'
 import { usePersonalActivo } from './hooks/usePersonalActivo'
 import { useCatalogosPolivalencia } from './hooks/useCatalogosPolivalencia'
@@ -30,6 +31,7 @@ export function PolivalenciaPage() {
 
   const [seleccionKey, setSeleccionKey] = useState(null)
   const [toast, setToast] = useState(null)
+  const [vistaPrincipal, setVistaPrincipal] = useState('personas')
 
   function mostrarToast(msg, tipo = '') {
     setToast({ msg, tipo })
@@ -115,10 +117,27 @@ export function PolivalenciaPage() {
 
       <AlertasBar vencidas={vencidas} pendientesNuevas={pendientesNuevas} />
 
+      <div className="pv-tabs">
+        <button className={vistaPrincipal === 'personas' ? 'active' : ''} onClick={() => setVistaPrincipal('personas')}>
+          Personas
+        </button>
+        <button className={vistaPrincipal === 'analisis' ? 'active' : ''} onClick={() => setVistaPrincipal('analisis')}>
+          Análisis
+        </button>
+      </div>
+
       {cargandoPersonal ? (
         <div className="pv-vacio">Cargando personal activo…</div>
-      ) : (
+      ) : vistaPrincipal === 'personas' ? (
         <PersonasTable filas={filas} onAbrir={(f) => setSeleccionKey(key(f.empleado.legajo, f.empleado.empresa))} />
+      ) : (
+        <AnalisisPolivalencia
+          personal={personal}
+          puestos={puestos}
+          niveles={niveles}
+          personaPorLegajo={personaPorLegajo}
+          detallePorPersonaId={detallePorPersonaId}
+        />
       )}
 
       {filaSeleccionada && (

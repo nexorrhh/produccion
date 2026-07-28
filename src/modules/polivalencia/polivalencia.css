@@ -230,3 +230,172 @@
   font-size: 12.5px;
   color: var(--red);
 }
+
+/* TABS de nivel superior (Personas / Análisis) */
+.pv-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.pv-tabs button {
+  padding: 9px 16px;
+  border: none;
+  background: transparent;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text2);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.pv-tabs button:hover {
+  color: var(--text);
+}
+.pv-tabs button.active {
+  color: var(--com);
+  border-bottom-color: var(--com);
+}
+
+/* Toolbar del análisis */
+.pv-analisis-toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.pv-chip-toggle {
+  display: flex;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.pv-chip-toggle button {
+  padding: 9px 14px;
+  border: none;
+  background: var(--surface);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text2);
+}
+.pv-chip-toggle button.active {
+  background: var(--com);
+  color: #fff;
+}
+.pv-filter {
+  padding: 9px 12px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  font-size: 13.5px;
+  background: var(--surface);
+  cursor: pointer;
+  margin-left: auto;
+}
+
+/* MATRIZ COMPLETA */
+.pv-matriz-scroll {
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+.pv-matriz {
+  border-collapse: collapse;
+  width: 100%;
+}
+.pv-matriz th,
+.pv-matriz td {
+  padding: 9px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.pv-matriz th {
+  background: var(--bg-soft);
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border);
+}
+.pv-matriz td.center {
+  text-align: center;
+}
+.pv-matriz-sticky {
+  position: sticky;
+  left: 0;
+  background: var(--surface);
+  z-index: 1;
+}
+.pv-matriz th.pv-matriz-sticky {
+  background: var(--bg-soft);
+  z-index: 2;
+}
+
+/* Badges de nivel — color según orden (1=iniciando..3=autónomo) */
+.pv-nivel-1 {
+  background: var(--amber-bg);
+  color: var(--amber);
+  border: 1px solid #fde68a;
+}
+.pv-nivel-2 {
+  background: var(--com-bg);
+  color: var(--com);
+  border: 1px solid var(--com-border);
+}
+.pv-nivel-3 {
+  background: var(--green-bg);
+  color: var(--green);
+  border: 1px solid var(--green-bd);
+}
+
+/* COBERTURA POR PUESTO */
+.pv-cobertura {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.pv-cobertura-puesto {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 14px 18px;
+}
+.pv-cobertura-puesto-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.pv-cobertura-puesto-header .g-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  background: var(--bg-soft);
+  padding: 2px 9px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+.pv-cobertura-vacio {
+  font-size: 12.5px;
+  color: var(--text3);
+}
+.pv-cobertura-grupo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  flex-wrap: wrap;
+}
+.pv-cobertura-nombres {
+  font-size: 13px;
+  color: var(--text);
+}
