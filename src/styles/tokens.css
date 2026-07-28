@@ -1,0 +1,29 @@
+/* Tokens de diseño portados de docs/reference/citaciones.html */
+:root {
+  --cim: #DC2626;
+  --cim-bg: #FEF2F2;
+  --cim-border: #FCA5A5;
+  --com: #2563EB;
+  --com-bg: #EFF6FF;
+  --com-border: #93C5FD;
+  --bg: #F8FAFC;
+  --surface: #FFFFFF;
+  --bg-soft: #F1F5F9;
+  --border: #E2E8F0;
+  --border2: #CBD5E1;
+  --text: #0F172A;
+  --text2: #64748B;
+  --text3: #94A3B8;
+  --green: #16A34A;
+  --green-bg: #F0FDF4;
+  --green-bd: #BBF7D0;
+  --amber: #D97706;
+  --amber-bg: #FFFBEB;
+  --red: #DC2626;
+  --red-bg: #FEF2F2;
+  --radius: 8px;
+  --radius-lg: 14px;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
