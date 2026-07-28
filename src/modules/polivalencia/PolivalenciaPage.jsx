@@ -5,6 +5,7 @@ import { MatrizPersonaPanel } from './components/MatrizPersonaPanel'
 import { Toast } from '../../app/components/Toast'
 import { usePersonalActivo } from './hooks/usePersonalActivo'
 import { useCatalogosPolivalencia } from './hooks/useCatalogosPolivalencia'
+import { usePuestosDisponibles } from './hooks/usePuestosDisponibles'
 import { usePolivalencia } from './hooks/usePolivalencia'
 import { calcularEstado } from './lib/vigencia'
 import './polivalencia.css'
@@ -16,6 +17,7 @@ function key(legajo, empresa) {
 export function PolivalenciaPage() {
   const { personal, cargando: cargandoPersonal, error: errorPersonal } = usePersonalActivo()
   const { niveles, puestos, crearPuesto } = useCatalogosPolivalencia()
+  const { combinarConCatalogo } = usePuestosDisponibles()
   const {
     personaPorLegajo,
     detallePorPersonaId,
@@ -35,6 +37,7 @@ export function PolivalenciaPage() {
   }
 
   const puestoNombrePorId = useMemo(() => new Map(puestos.map((p) => [p.id, p.nombre])), [puestos])
+  const puestosDisponibles = useMemo(() => combinarConCatalogo(puestos), [combinarConCatalogo, puestos])
 
   const filas = useMemo(() => {
     return personal.map((empleado) => {
@@ -122,7 +125,7 @@ export function PolivalenciaPage() {
         <MatrizPersonaPanel
           fila={filaSeleccionada}
           filasDetalle={filasDetalleSeleccionada}
-          puestos={puestos}
+          puestos={puestosDisponibles}
           niveles={niveles}
           onCerrar={() => setSeleccionKey(null)}
           onCrearPuesto={handleCrearPuesto}

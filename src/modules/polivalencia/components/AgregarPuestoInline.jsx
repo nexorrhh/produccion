@@ -2,14 +2,18 @@ import { useState } from 'react'
 
 const NUEVO = '__nuevo__'
 
+// `puestos`: lista combinada de puestos reales (empleados) + catálogo de
+// Polivalencia, sin repetir — { nombre, id }. `id` es null cuando ese
+// puesto todavía no se usó nunca en Polivalencia (se da de alta recién al
+// asignarlo por primera vez).
 export function AgregarPuestoInline({ puestos, niveles, yaAsignados, onCrearPuesto, onAgregar }) {
-  const [puestoId, setPuestoId] = useState('')
+  const [puestoNombre, setPuestoNombre] = useState('')
   const [nombreNuevo, setNombreNuevo] = useState('')
   const [nivelId, setNivelId] = useState('')
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
 
-  const disponibles = puestos.filter((p) => !yaAsignados.has(p.id))
+  const disponibles = puestos.filter((p) => !(p.id && yaAsignados.has(p.id)))
 
   async function handleAgregar() {
     setError('')
@@ -17,25 +21,27 @@ export function AgregarPuestoInline({ puestos, niveles, yaAsignados, onCrearPues
       setError('Elegí un nivel')
       return
     }
-    if (!puestoId) {
-      setError('Elegí o creá un puesto/tarea')
+    if (!puestoNombre) {
+      setError('Elegí un puesto/tarea')
       return
     }
 
     setGuardando(true)
     try {
-      let idFinal = puestoId
-      if (puestoId === NUEVO) {
+      let idFinal
+      if (puestoNombre === NUEVO) {
         if (!nombreNuevo.trim()) {
           setError('Escribí el nombre del puesto/tarea nuevo')
           setGuardando(false)
           return
         }
-        const creado = await onCrearPuesto(nombreNuevo.trim())
-        idFinal = creado.id
+        idFinal = (await onCrearPuesto(nombreNuevo.trim())).id
+      } else {
+        const elegido = disponibles.find((p) => p.nombre === puestoNombre)
+        idFinal = elegido.id || (await onCrearPuesto(elegido.nombre)).id
       }
       await onAgregar(idFinal, nivelId)
-      setPuestoId('')
+      setPuestoNombre('')
       setNombreNuevo('')
       setNivelId('')
     } catch (err) {
@@ -47,22 +53,22 @@ export function AgregarPuestoInline({ puestos, niveles, yaAsignados, onCrearPues
 
   return (
     <div className="pv-agregar">
-      <select value={puestoId} onChange={(e) => setPuestoId(e.target.value)}>
+      <select value={puestoNombre} onChange={(e) => setPuestoNombre(e.target.value)}>
         <option value="" disabled>
           Puesto / tarea…
         </option>
         {disponibles.map((p) => (
-          <option key={p.id} value={p.id}>
+          <option key={p.nombre} value={p.nombre}>
             {p.nombre}
           </option>
         ))}
-        <option value={NUEVO}>+ Crear nuevo…</option>
+        <option value={NUEVO}>+ Otra tarea (no es un puesto formal)…</option>
       </select>
 
-      {puestoId === NUEVO && (
+      {puestoNombre === NUEVO && (
         <input
           type="text"
-          placeholder="Nombre del puesto/tarea"
+          placeholder="Nombre de la tarea"
           value={nombreNuevo}
           onChange={(e) => setNombreNuevo(e.target.value)}
         />

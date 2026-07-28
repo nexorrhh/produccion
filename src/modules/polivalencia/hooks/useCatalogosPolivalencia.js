@@ -44,15 +44,37 @@ export function useCatalogosPolivalencia() {
     cargar()
   }, [cargar])
 
-  // Crea un puesto/tarea nuevo en el catálogo (arranca vacío, se carga
-  // desde la app a medida que hace falta).
+  // Da de alta un puesto/tarea en el catálogo la primera vez que se usa en
+  // Polivalencia (por ejemplo, un puesto real de `empleados` que todavía
+  // no se había asignado a nadie acá). Si otra persona lo creó justo antes
+  // (choque de nombre único), se recupera la fila existente en vez de
+  // fallar.
   async function crearPuesto(nombre) {
+    const nombreLimpio = nombre.trim()
     const { data, error } = await supabase
       .from('produccion_puestos_polivalencia')
-      .insert({ nombre: nombre.trim(), ...stampCreate(user) })
+      .insert({ nombre: nombreLimpio, ...stampCreate(user) })
       .select()
       .single()
-    if (error) throw error
+
+    if (error) {
+      if (error.code === '23505') {
+        const { data: existente, error: err2 } = await supabase
+          .from('produccion_puestos_polivalencia')
+          .select('id,nombre')
+          .eq('nombre', nombreLimpio)
+          .single()
+        if (err2) throw err2
+        setPuestos((prev) =>
+          prev.some((p) => p.id === existente.id)
+            ? prev
+            : [...prev, existente].sort((a, b) => a.nombre.localeCompare(b.nombre))
+        )
+        return existente
+      }
+      throw error
+    }
+
     setPuestos((prev) => [...prev, data].sort((a, b) => a.nombre.localeCompare(b.nombre)))
     return data
   }
