@@ -5,6 +5,8 @@ import { Toast } from '../../app/components/Toast'
 import { usePuestosActivos } from './hooks/usePuestosActivos'
 import './busqueda-personal.css'
 
+const SECTORES = ['Administrativo', 'Calidad', 'Gerencia', 'Ingeniería', 'Producción', 'Taller']
+
 const MOTIVOS = [
   'Baja / renuncia',
   'Crecimiento',
@@ -116,15 +118,17 @@ export function BusquedaPersonalPage() {
               <label htmlFor="sector">
                 Sector / Área <span className="bp-req">*</span>
               </label>
-              <input
-                id="sector"
-                type="text"
-                placeholder="ej: Producción, Calidad, Ingeniería"
-                autoComplete="off"
-                value={form.sector}
-                onChange={(e) => set('sector', e.target.value)}
-              />
-              <div className="bp-error-msg">Ingresá el sector o área.</div>
+              <select id="sector" value={form.sector} onChange={(e) => set('sector', e.target.value)}>
+                <option value="" disabled>
+                  Seleccionar…
+                </option>
+                {SECTORES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+              <div className="bp-error-msg">Elegí el sector o área.</div>
             </div>
 
             <div className={'bp-field' + (invalidos.cantidad ? ' invalid' : '')}>
