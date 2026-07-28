@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import { SetupBar, diaDeFecha, tipoSugerido } from './components/SetupBar'
 import { Toolbar } from './components/Toolbar'
-import { DiagPanel } from './components/DiagPanel'
 import { OperativosTable } from './components/OperativosTable'
 import { ActionBar } from './components/ActionBar'
 import { Toast } from './components/Toast'
@@ -145,8 +144,6 @@ export function OperativosPage() {
       />
 
       <Toolbar filtros={filtros} onFiltrosChange={setFiltros} puestos={puestos} vista={vista} onVistaChange={setVista} />
-
-      <DiagPanel empleados={empleados} mapaClasif={mapaClasif} />
 
       <OperativosTable
         empleados={empleados}

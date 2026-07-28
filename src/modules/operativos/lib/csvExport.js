@@ -1,7 +1,5 @@
 import { key, tipoPago } from './clasificacion'
-
-const ORDEN_TIPO = { quincenal: 0, mensual: 1, sin_asignar: 2 }
-const TIPO_LABEL = { quincenal: 'Quincenal', mensual: 'Mensual', sin_asignar: 'Sin clasificar' }
+import { labelTipoPuesto, ordenTipoPuesto } from './tiposPuesto'
 
 export function exportarCSV(seleccion, empleados, mapaClasif, fecha, dia) {
   const sels = Object.keys(seleccion)
@@ -13,7 +11,7 @@ export function exportarCSV(seleccion, empleados, mapaClasif, fecha, dia) {
     const eb = empleados.find((x) => key(x) === b)
     const ta = tipoPago(ea, mapaClasif)
     const tb = tipoPago(eb, mapaClasif)
-    if (ta !== tb) return ORDEN_TIPO[ta] - ORDEN_TIPO[tb]
+    if (ta !== tb) return ordenTipoPuesto(ta) - ordenTipoPuesto(tb)
     return (ea.apellido_y_nombre || '').localeCompare(eb.apellido_y_nombre || '')
   })
 
@@ -24,7 +22,7 @@ export function exportarCSV(seleccion, empleados, mapaClasif, fecha, dia) {
     if (s.manana && s.tarde) horario = 'Ambos'
     else if (s.manana) horario = '07 a 12'
     else if (s.tarde) horario = '12 a 16'
-    const tipo = TIPO_LABEL[tipoPago(e, mapaClasif)]
+    const tipo = labelTipoPuesto(tipoPago(e, mapaClasif))
     rows.push([e.apellido_y_nombre, tipo, horario, s.ot || '', s.trabajo || '', 'Convocado'])
   })
 

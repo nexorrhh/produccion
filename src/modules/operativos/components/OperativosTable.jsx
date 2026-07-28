@@ -1,10 +1,5 @@
 import { key, norm, tipoPago } from '../lib/clasificacion'
-
-const GRUPOS = [
-  { tipo: 'quincenal', clase: 'quincenal', titulo: 'Quincenales' },
-  { tipo: 'mensual', clase: 'mensual', titulo: 'Mensuales' },
-  { tipo: 'sin_asignar', clase: 'sinasignar', titulo: 'Sin clasificar' },
-]
+import { TIPOS_PUESTO } from '../lib/tiposPuesto'
 
 export function OperativosTable({
   empleados,
@@ -44,9 +39,11 @@ export function OperativosTable({
     )
   }
 
-  const grupos = GRUPOS.map((g) => ({
-    ...g,
-    items: lista.filter((e) => tipoPago(e, mapaClasif) === g.tipo),
+  const grupos = TIPOS_PUESTO.map((t) => ({
+    tipo: t.key,
+    clase: t.cssClass,
+    titulo: t.labelPlural,
+    items: lista.filter((e) => tipoPago(e, mapaClasif) === t.key),
   })).filter((g) => g.items.length)
 
   return (
