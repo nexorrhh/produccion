@@ -7,18 +7,11 @@ import './busqueda-personal.css'
 
 const SECTORES = ['Administrativo', 'Calidad', 'Gerencia', 'Ingeniería', 'Producción', 'Taller']
 
-const MOTIVOS = [
-  'Baja / renuncia',
-  'Crecimiento',
-  'Nuevo puesto',
-  'Reemplazo temporal',
-  'Otro',
-]
+const MOTIVOS = ['Baja / renuncia', 'Crecimiento', 'Reemplazo temporal', 'Otro']
 
 const MOTIVO_LABEL = {
   'Baja / renuncia': 'Baja / renuncia',
   Crecimiento: 'Crecimiento de plantel',
-  'Nuevo puesto': 'Nuevo puesto',
   'Reemplazo temporal': 'Reemplazo temporal',
   Otro: 'Otro',
 }
