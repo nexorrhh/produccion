@@ -21,11 +21,13 @@ create table if not exists produccion_niveles_polivalencia (
   modificado_en timestamptz
 );
 
+-- Escala de autonomía para cubrir OTRO puesto (no el propio): de menor a
+-- mayor independencia respecto de la supervisión.
 insert into produccion_niveles_polivalencia (nombre, orden)
 values
-  ('Básico', 1),
-  ('Intermedio', 2),
-  ('Experto', 3)
+  ('Iniciando', 1),
+  ('Con apoyo', 2),
+  ('Autónomo', 3)
 on conflict (nombre) do nothing;
 
 -- Puestos/tareas asignables en la matriz. Arranca vacío — se carga desde
