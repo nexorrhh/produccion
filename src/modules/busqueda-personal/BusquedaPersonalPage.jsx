@@ -64,7 +64,12 @@ export function BusquedaPersonalPage() {
         motivo: form.motivo,
         descripcion: form.descripcion.trim() || null,
         solicitado_por: user.nombre_apellido,
-        empresa: null,
+        // La columna empresa es NOT NULL en la tabla real (no es nullable
+        // como se había asumido) — se manda vacío en vez de null hasta que
+        // Directorio la defina al aprobar. Las pantallas que ya leen esta
+        // tabla en Tablero_RRHH tratan `empresa` como falsy-tolerante
+        // (`s.empresa ? ... : ''`), así que un string vacío no rompe nada.
+        empresa: '',
         estado: 'pendiente',
       })
       if (error) throw error
