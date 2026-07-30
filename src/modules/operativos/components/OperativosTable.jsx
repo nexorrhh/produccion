@@ -133,8 +133,14 @@ function FilaEmpleado({ empleado: e, sel, cumplimiento: cmp, onToggleCitar, onSe
   if (cmp && cmp.convocado > 0) {
     const pct = Math.round(cmp.pct_cumplimiento)
     const color = pct >= 80 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : 'var(--red)'
+    const ausente = cmp.ausente || 0
+    const noConvocado = cmp.no_convocado || 0
+    let titulo = `De ${cmp.convocado} operativo${cmp.convocado === 1 ? '' : 's'} a los que fue convocad@, vino a ${cmp.presente}`
+    titulo += ausente ? ` y faltó a ${ausente}` : ', sin faltar ninguna vez'
+    if (noConvocado) titulo += `. Además vino sin estar citad@ ${noConvocado} vez${noConvocado === 1 ? '' : 'es'}`
+    titulo += ` (${pct}% de cumplimiento).`
     cmpNode = (
-      <div className="op-cmp-bar">
+      <div className="op-cmp-bar" title={titulo}>
         <div className="op-cmp-track">
           <div className="op-cmp-fill" style={{ width: pct + '%', background: color }} />
         </div>
