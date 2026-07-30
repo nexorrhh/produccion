@@ -3,7 +3,11 @@ import { useAuth } from '../../app/auth/useAuth'
 import { supabase } from '../../app/supabaseClient'
 import { Toast } from '../../app/components/Toast'
 import { usePuestosActivos } from './hooks/usePuestosActivos'
+import { usePersonalInactivo } from './hooks/usePersonalInactivo'
+import { SelectorReemplazo } from './components/SelectorReemplazo'
 import './busqueda-personal.css'
+
+const MOTIVO_BAJA = 'Baja / renuncia'
 
 const SECTORES = ['Administrativo', 'Calidad', 'Gerencia', 'Ingeniería', 'Producción', 'Taller']
 
@@ -21,15 +25,22 @@ const FORM_INICIAL = { puesto: '', sector: '', cantidad: '1', motivo: '', descri
 export function BusquedaPersonalPage() {
   const { user } = useAuth()
   const { puestos, cargando, error: errorPuestos } = usePuestosActivos()
+  const { personal: personalInactivo, cargando: cargandoInactivos } = usePersonalInactivo()
 
   const [form, setForm] = useState(FORM_INICIAL)
   const [invalidos, setInvalidos] = useState({})
+  const [reemplazo, setReemplazo] = useState(null)
   const [enviando, setEnviando] = useState(false)
   const [toast, setToast] = useState(null)
 
   function set(campo, valor) {
     setForm((f) => ({ ...f, [campo]: valor }))
     setInvalidos((inv) => ({ ...inv, [campo]: false }))
+  }
+
+  function handleMotivoChange(valor) {
+    set('motivo', valor)
+    if (valor !== MOTIVO_BAJA) setReemplazo(null)
   }
 
   function mostrarToast(msg, tipo = '') {
@@ -71,12 +82,16 @@ export function BusquedaPersonalPage() {
         // (`s.empresa ? ... : ''`), así que un string vacío no rompe nada.
         empresa: '',
         estado: 'pendiente',
+        reemplazo_legajo: reemplazo?.legajo ?? null,
+        reemplazo_empresa: reemplazo?.empresa ?? null,
+        reemplazo_nombre: reemplazo?.apellido_y_nombre ?? null,
       })
       if (error) throw error
 
       mostrarToast('Solicitud enviada — el área de RRHH la recibirá', 'ok')
       setForm(FORM_INICIAL)
       setInvalidos({})
+      setReemplazo(null)
     } catch (err) {
       mostrarToast('No se pudo enviar: ' + err.message, 'error')
     } finally {
@@ -149,7 +164,7 @@ export function BusquedaPersonalPage() {
             <label htmlFor="motivo">
               Motivo <span className="bp-req">*</span>
             </label>
-            <select id="motivo" value={form.motivo} onChange={(e) => set('motivo', e.target.value)}>
+            <select id="motivo" value={form.motivo} onChange={(e) => handleMotivoChange(e.target.value)}>
               <option value="" disabled>
                 Seleccionar…
               </option>
@@ -161,6 +176,21 @@ export function BusquedaPersonalPage() {
             </select>
             <div className="bp-error-msg">Elegí un motivo.</div>
           </div>
+
+          {form.motivo === MOTIVO_BAJA && (
+            <div className="bp-field">
+              <label>
+                ¿A quién reemplaza? <span className="bp-opt">(opcional)</span>
+              </label>
+              <SelectorReemplazo
+                personal={personalInactivo}
+                cargando={cargandoInactivos}
+                seleccionado={reemplazo}
+                onSeleccionar={setReemplazo}
+                onQuitar={() => setReemplazo(null)}
+              />
+            </div>
+          )}
 
           <div className="bp-field">
             <label htmlFor="descripcion">

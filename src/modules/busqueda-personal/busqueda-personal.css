@@ -110,3 +110,66 @@
   color: var(--text3);
   margin-top: 20px;
 }
+
+/* Selector de reemplazo (buscador de personal de baja) */
+.bp-reemplazo-buscador {
+  position: relative;
+}
+.bp-reemplazo-lista {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+}
+.bp-reemplazo-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 9px 13px;
+  border: none;
+  border-bottom: 1px solid #f1f5f9;
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 13.5px;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.bp-reemplazo-item:last-child {
+  border-bottom: none;
+}
+.bp-reemplazo-item:hover {
+  background: var(--bg-soft);
+}
+.bp-reemplazo-item-sub {
+  font-size: 11.5px;
+  color: var(--text2);
+}
+.bp-reemplazo-vacio {
+  padding: 12px 13px;
+  font-size: 12.5px;
+  color: var(--text3);
+}
+
+.bp-reemplazo-elegido {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 13px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  background: var(--bg-soft);
+  font-size: 13.5px;
+}
+.bp-reemplazo-elegido span {
+  flex: 1;
+}
