@@ -19,18 +19,27 @@ function BarraPct({ pct }) {
 
 export function TablaPorPersona({ filas }) {
   const [empresa, setEmpresa] = useState('')
+  const [puesto, setPuesto] = useState('')
   const [busqueda, setBusqueda] = useState('')
   const [expandido, setExpandido] = useState(false)
+
+  const puestos = useMemo(
+    () => [...new Set(filas.map((p) => p.desc_puesto).filter(Boolean))].sort(),
+    [filas]
+  )
 
   const filtradas = useMemo(() => {
     let lista = [...filas].sort((a, b) => (a.apellido_y_nombre || '').localeCompare(b.apellido_y_nombre || ''))
     if (empresa) lista = lista.filter((p) => p.empresa === empresa)
+    if (puesto) lista = lista.filter((p) => p.desc_puesto === puesto)
     if (busqueda) {
       const txt = busqueda.toLowerCase()
-      lista = lista.filter((p) => (p.apellido_y_nombre || '').toLowerCase().includes(txt))
+      lista = lista.filter(
+        (p) => (p.apellido_y_nombre || '').toLowerCase().includes(txt) || String(p.legajo).includes(txt)
+      )
     }
     return lista
-  }, [filas, empresa, busqueda])
+  }, [filas, empresa, puesto, busqueda])
 
   const visibles = expandido ? filtradas : filtradas.slice(0, LIMITE)
 
@@ -48,10 +57,18 @@ export function TablaPorPersona({ filas }) {
             Co.mo.ing
           </button>
         </div>
+        <select className="an-filter" value={puesto} onChange={(e) => setPuesto(e.target.value)}>
+          <option value="">Todos los puestos</option>
+          {puestos.map((p) => (
+            <option key={p} value={p}>
+              {p}
+            </option>
+          ))}
+        </select>
         <input
           type="text"
           className="an-busqueda"
-          placeholder="Buscar por nombre…"
+          placeholder="Buscar por legajo o nombre…"
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
         />

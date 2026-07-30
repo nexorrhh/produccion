@@ -191,6 +191,14 @@
   margin-bottom: 12px;
   flex-wrap: wrap;
 }
+.an-filter {
+  padding: 9px 12px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  font-size: 13px;
+  background: var(--surface);
+  cursor: pointer;
+}
 .an-busqueda {
   padding: 9px 12px;
   border: 1px solid var(--border2);

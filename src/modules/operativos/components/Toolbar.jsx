@@ -12,7 +12,7 @@ export function Toolbar({ filtros, onFiltrosChange, puestos, vista, onVistaChang
         </svg>
         <input
           type="text"
-          placeholder="Buscar persona…"
+          placeholder="Buscar por legajo o nombre…"
           value={filtros.search}
           onChange={(e) => set('search', e.target.value)}
         />

@@ -31,16 +31,31 @@ export function useResumenOperativos() {
       setCargando(true)
       setError('')
       try {
-        const [{ data: fechaData, error: fechaErr }, { data: personaData, error: personaErr }] = await Promise.all([
+        const [
+          { data: fechaData, error: fechaErr },
+          { data: personaData, error: personaErr },
+          { data: empleadosData },
+        ] = await Promise.all([
           supabase.from('v_resumen_fecha').select('*'),
           supabase.from('v_cumplimiento_persona').select('*'),
+          // Solo para poder filtrar "por persona" por puesto actual — la
+          // vista de cumplimiento no trae desc_puesto.
+          supabase.from('empleados').select('legajo,empresa,desc_puesto').eq('activo', true),
         ])
         if (fechaErr) throw fechaErr
         if (personaErr) throw personaErr
         if (cancelled) return
 
+        const puestoPorPersona = new Map(
+          (empleadosData || []).map((e) => [e.legajo + '|' + e.empresa, e.desc_puesto])
+        )
+        const personaConPuesto = (personaData || []).map((p) => ({
+          ...p,
+          desc_puesto: puestoPorPersona.get(p.legajo + '|' + p.empresa) || '',
+        }))
+
         setPorFecha(normalizar(fechaData, CAMPOS_NUM_FECHA))
-        setPorPersona(normalizar(personaData, CAMPOS_NUM_PERSONA))
+        setPorPersona(normalizar(personaConPuesto, CAMPOS_NUM_PERSONA))
       } catch (e) {
         if (!cancelled) setError('No se pudo cargar el resumen de operativos: ' + e.message)
       } finally {

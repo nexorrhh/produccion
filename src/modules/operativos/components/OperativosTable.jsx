@@ -16,7 +16,7 @@ export function OperativosTable({
   const lista = empleados.filter((e) => {
     if (filtros.empresa && e.empresa !== filtros.empresa) return false
     if (filtros.puesto && e.desc_puesto !== filtros.puesto) return false
-    if (txt && !norm(e.apellido_y_nombre).includes(txt)) return false
+    if (txt && !norm(e.apellido_y_nombre).includes(txt) && !String(e.legajo).includes(txt)) return false
     if (vista === 'citados' && !seleccion[key(e)]) return false
     if (filtros.tipopago && tipoPago(e, mapaClasif) !== filtros.tipopago) return false
     return true

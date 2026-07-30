@@ -291,7 +291,20 @@
   font-size: 13.5px;
   background: var(--surface);
   cursor: pointer;
+}
+.pv-toolbar-right {
   margin-left: auto;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.pv-busqueda {
+  padding: 9px 12px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  font-size: 13px;
+  min-width: 220px;
 }
 
 /* MATRIZ COMPLETA */

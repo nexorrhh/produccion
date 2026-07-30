@@ -9,11 +9,26 @@ function key(legajo, empresa) {
 export function AnalisisPolivalencia({ personal, puestos, niveles, personaPorLegajo, detallePorPersonaId }) {
   const [vista, setVista] = useState('matriz')
   const [empresa, setEmpresa] = useState('')
+  const [puestoFiltro, setPuestoFiltro] = useState('')
+  const [busqueda, setBusqueda] = useState('')
 
-  const personalFiltrado = useMemo(
-    () => (empresa ? personal.filter((e) => e.empresa === empresa) : personal),
-    [personal, empresa]
+  const puestosPersonal = useMemo(
+    () => [...new Set(personal.map((e) => e.desc_puesto).filter(Boolean))].sort(),
+    [personal]
   )
+
+  const personalFiltrado = useMemo(() => {
+    let lista = personal
+    if (empresa) lista = lista.filter((e) => e.empresa === empresa)
+    if (puestoFiltro) lista = lista.filter((e) => e.desc_puesto === puestoFiltro)
+    if (busqueda) {
+      const txt = busqueda.toLowerCase()
+      lista = lista.filter(
+        (e) => (e.apellido_y_nombre || '').toLowerCase().includes(txt) || String(e.legajo).includes(txt)
+      )
+    }
+    return lista
+  }, [personal, empresa, puestoFiltro, busqueda])
 
   const nivelPorId = useMemo(() => new Map(niveles.map((n) => [n.id, n])), [niveles])
 
@@ -74,11 +89,28 @@ export function AnalisisPolivalencia({ personal, puestos, niveles, personaPorLeg
             Cobertura por puesto
           </button>
         </div>
-        <select className="pv-filter" value={empresa} onChange={(e) => setEmpresa(e.target.value)}>
-          <option value="">Ambas empresas</option>
-          <option value="CIMOMET">Cimomet</option>
-          <option value="COMOING">Co.mo.ing</option>
-        </select>
+        <div className="pv-toolbar-right">
+          <select className="pv-filter" value={empresa} onChange={(e) => setEmpresa(e.target.value)}>
+            <option value="">Ambas empresas</option>
+            <option value="CIMOMET">Cimomet</option>
+            <option value="COMOING">Co.mo.ing</option>
+          </select>
+          <select className="pv-filter" value={puestoFiltro} onChange={(e) => setPuestoFiltro(e.target.value)}>
+            <option value="">Todos los puestos</option>
+            {puestosPersonal.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
+          <input
+            type="text"
+            className="pv-busqueda"
+            placeholder="Buscar por legajo o nombre…"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+          />
+        </div>
       </div>
 
       {vista === 'matriz' ? (
