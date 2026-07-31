@@ -191,12 +191,24 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  overflow: hidden;
   box-shadow: var(--shadow);
 }
 .op-table-container table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.op-table-container thead tr:first-child th:first-child {
+  border-top-left-radius: var(--radius-lg);
+}
+.op-table-container thead tr:first-child th:last-child {
+  border-top-right-radius: var(--radius-lg);
+}
+.op-table-container tbody tr:last-child td:first-child {
+  border-bottom-left-radius: var(--radius-lg);
+}
+.op-table-container tbody tr:last-child td:last-child {
+  border-bottom-right-radius: var(--radius-lg);
 }
 .op-table-container thead th {
   background: var(--bg-soft);
@@ -420,4 +432,80 @@
 .op-tabs button.active {
   color: var(--com);
   border-bottom-color: var(--com);
+}
+
+/* Tarjeta de detalle del cumplimiento (al pasar el mouse) */
+.cmp-tooltip-wrap {
+  position: relative;
+  display: inline-block;
+}
+.cmp-tooltip-card {
+  display: none;
+  position: absolute;
+  z-index: 60;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 220px;
+  background: #16181d;
+  color: #fff;
+  border-radius: 10px;
+  padding: 14px 16px;
+  box-shadow: var(--shadow-lg);
+  font-size: 12.5px;
+  text-align: left;
+  white-space: nowrap;
+}
+.cmp-tooltip-wrap:hover .cmp-tooltip-card {
+  display: block;
+}
+.cmp-tooltip-header {
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 8px;
+  color: #fff;
+}
+.cmp-tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  color: #e2e8f0;
+}
+.cmp-tooltip-row b {
+  margin-left: auto;
+  padding-left: 14px;
+  color: #fff;
+}
+.cmp-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.cmp-dot-verde {
+  background: #22c55e;
+}
+.cmp-dot-rojo {
+  background: #ef4444;
+}
+.cmp-dot-gris {
+  background: #94a3b8;
+}
+.cmp-tooltip-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 8px 0;
+}
+.cmp-tooltip-total {
+  display: flex;
+  align-items: center;
+  color: #94a3b8;
+  font-size: 12px;
+}
+.cmp-tooltip-total b {
+  margin-left: auto;
+  padding-left: 14px;
+  color: #fff;
+  font-size: 13px;
 }

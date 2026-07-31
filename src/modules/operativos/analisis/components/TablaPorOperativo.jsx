@@ -1,22 +1,8 @@
 import { useMemo, useState } from 'react'
-import { colorPct, diaDe, fmtFecha } from '../lib/formatoFecha'
-import { tituloCumplimientoOperativo } from '../../lib/tituloCumplimiento'
+import { diaDe, fmtFecha } from '../lib/formatoFecha'
+import { CumplimientoBarra } from '../../components/CumplimientoBarra'
 
 const LIMITE = 10
-
-function BarraPct({ pct, titulo }) {
-  const color = colorPct(pct)
-  return (
-    <div className="an-barra" title={titulo}>
-      <div className="an-barra-track">
-        <div className="an-barra-fill" style={{ width: pct + '%', background: color }} />
-      </div>
-      <span className="an-barra-pct" style={{ color }}>
-        {pct}%
-      </span>
-    </div>
-  )
-}
 
 export function TablaPorOperativo({ filas }) {
   const [filtroTipo, setFiltroTipo] = useState('todos')
@@ -87,7 +73,15 @@ export function TablaPorOperativo({ filas }) {
                   <td className="center">{f.ausentes}</td>
                   <td className="center">{f.no_convocados}</td>
                   <td>
-                    <BarraPct pct={Math.round(f.pct_cumplimiento)} titulo={tituloCumplimientoOperativo(f)} />
+                    <CumplimientoBarra
+                      pct={Math.round(f.pct_cumplimiento)}
+                      presentes={f.presentes}
+                      ausentes={f.ausentes || 0}
+                      noConvocados={f.no_convocados || 0}
+                      totalLabel="Total convocados"
+                      total={f.convocados}
+                      tituloContexto={`${fmtFecha(f.fecha)} · ${f.tipo === 'Sabado' ? 'Sábado' : f.tipo}`}
+                    />
                   </td>
                 </tr>
               ))

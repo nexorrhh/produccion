@@ -212,12 +212,24 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  overflow: hidden;
   box-shadow: var(--shadow);
 }
 .an-table-container table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.an-table-container thead tr:first-child th:first-child {
+  border-top-left-radius: var(--radius-lg);
+}
+.an-table-container thead tr:first-child th:last-child {
+  border-top-right-radius: var(--radius-lg);
+}
+.an-table-container tbody tr:last-child td:first-child {
+  border-bottom-left-radius: var(--radius-lg);
+}
+.an-table-container tbody tr:last-child td:last-child {
+  border-bottom-right-radius: var(--radius-lg);
 }
 .an-table-container thead th {
   background: var(--bg-soft);
@@ -247,30 +259,6 @@
 }
 .an-table-container tbody tr:hover td {
   background: #fafcfe;
-}
-
-.an-barra {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.an-barra-track {
-  flex: 1;
-  height: 6px;
-  background: var(--bg-soft);
-  border-radius: 3px;
-  overflow: hidden;
-  min-width: 50px;
-  max-width: 90px;
-}
-.an-barra-fill {
-  height: 100%;
-  border-radius: 3px;
-}
-.an-barra-pct {
-  font-size: 12px;
-  font-weight: 700;
-  min-width: 36px;
 }
 
 .an-ver-mas {

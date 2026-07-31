@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
-import { colorPct } from '../lib/formatoFecha'
-import { tituloCumplimientoPersona } from '../../lib/tituloCumplimiento'
+import { CumplimientoBarra } from '../../components/CumplimientoBarra'
 import { flechaOrden, ordenarFilas, useOrdenTabla } from '../../../../app/lib/ordenarTabla'
 
 function valorOrden(p, campo) {
@@ -10,20 +9,6 @@ function valorOrden(p, campo) {
 }
 
 const LIMITE = 10
-
-function BarraPct({ pct, titulo }) {
-  const color = colorPct(pct)
-  return (
-    <div className="an-barra" title={titulo}>
-      <div className="an-barra-track">
-        <div className="an-barra-fill" style={{ width: pct + '%', background: color }} />
-      </div>
-      <span className="an-barra-pct" style={{ color }}>
-        {pct}%
-      </span>
-    </div>
-  )
-}
 
 export function TablaPorPersona({ filas }) {
   const [empresa, setEmpresa] = useState('')
@@ -128,7 +113,15 @@ export function TablaPorPersona({ filas }) {
                   <td className="center">{p.ausente}</td>
                   <td className="center">{p.no_convocado}</td>
                   <td>
-                    <BarraPct pct={Math.round(p.pct_cumplimiento)} titulo={tituloCumplimientoPersona(p)} />
+                    <CumplimientoBarra
+                      pct={Math.round(p.pct_cumplimiento)}
+                      presentes={p.presente}
+                      ausentes={p.ausente || 0}
+                      noConvocados={p.no_convocado || 0}
+                      totalLabel="Total operativos"
+                      total={p.convocado}
+                      tituloContexto={p.apellido_y_nombre}
+                    />
                   </td>
                 </tr>
               ))

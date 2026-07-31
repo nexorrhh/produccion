@@ -15,7 +15,3 @@ export function fmtFechaCorta(f) {
 export function diaDe(f) {
   return DIAS[new Date(f + 'T00:00:00').getDay()]
 }
-
-export function colorPct(pct) {
-  return pct >= 80 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : 'var(--red)'
-}
