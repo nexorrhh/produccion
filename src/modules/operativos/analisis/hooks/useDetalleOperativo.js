@@ -7,6 +7,7 @@ import { supabase } from '../../../../app/supabaseClient'
 // herramienta externa de asistencia) — acá solo se lee.
 export function useDetalleOperativo(fecha) {
   const [detalle, setDetalle] = useState(null)
+  const [mapaClasif, setMapaClasif] = useState(new Map())
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState('')
 
@@ -22,15 +23,22 @@ export function useDetalleOperativo(fecha) {
       setCargando(true)
       setError('')
       try {
-        const { data, error: err } = await supabase
-          .from('citaciones')
-          .select(
-            'id,fecha,tipo,dia_semana,citacion_detalle(legajo,empresa,apellido_y_nombre,desc_puesto,turno_manana,turno_tarde,ot,trabajo,situacion)'
-          )
-          .eq('fecha', fecha)
-          .maybeSingle()
+        const [{ data, error: err }, { data: clasifData }] = await Promise.all([
+          supabase
+            .from('citaciones')
+            .select(
+              'id,fecha,tipo,dia_semana,citacion_detalle(legajo,empresa,apellido_y_nombre,desc_puesto,turno_manana,turno_tarde,ot,trabajo,situacion)'
+            )
+            .eq('fecha', fecha)
+            .maybeSingle(),
+          // Para agrupar el listado de impresión igual que Citar (Quincenal/Mensual/Sin clasificar).
+          supabase.from('rrhh_puestos_config').select('desc_puesto,tipo'),
+        ])
         if (err) throw err
-        if (!cancelled) setDetalle(data)
+        if (cancelled) return
+
+        setDetalle(data)
+        setMapaClasif(new Map((clasifData || []).map((f) => [f.desc_puesto, f.tipo])))
       } catch (e) {
         if (!cancelled) setError('No se pudo cargar el detalle: ' + e.message)
       } finally {
@@ -44,5 +52,5 @@ export function useDetalleOperativo(fecha) {
     }
   }, [fecha])
 
-  return { detalle, cargando, error }
+  return { detalle, mapaClasif, cargando, error }
 }

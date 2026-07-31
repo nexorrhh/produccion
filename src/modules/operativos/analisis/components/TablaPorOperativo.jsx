@@ -11,7 +11,12 @@ export function TablaPorOperativo({ filas }) {
   const [busqueda, setBusqueda] = useState('')
   const [expandido, setExpandido] = useState(false)
   const [fechaSeleccionada, setFechaSeleccionada] = useState(null)
-  const { detalle, cargando: cargandoDetalle, error: errorDetalle } = useDetalleOperativo(fechaSeleccionada)
+  const {
+    detalle,
+    mapaClasif,
+    cargando: cargandoDetalle,
+    error: errorDetalle,
+  } = useDetalleOperativo(fechaSeleccionada)
 
   const filtradas = useMemo(() => {
     let lista = [...filas]
@@ -112,6 +117,7 @@ export function TablaPorOperativo({ filas }) {
         <DetalleOperativoModal
           fecha={fechaSeleccionada}
           detalle={detalle}
+          mapaClasif={mapaClasif}
           cargando={cargandoDetalle}
           error={errorDetalle}
           onCerrar={() => setFechaSeleccionada(null)}
