@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react'
 import { colorPct, diaDe, fmtFecha } from '../lib/formatoFecha'
+import { tituloCumplimientoOperativo } from '../../lib/tituloCumplimiento'
 
 const LIMITE = 10
 
-function BarraPct({ pct }) {
+function BarraPct({ pct, titulo }) {
   const color = colorPct(pct)
   return (
-    <div className="an-barra">
+    <div className="an-barra" title={titulo}>
       <div className="an-barra-track">
         <div className="an-barra-fill" style={{ width: pct + '%', background: color }} />
       </div>
@@ -86,7 +87,7 @@ export function TablaPorOperativo({ filas }) {
                   <td className="center">{f.ausentes}</td>
                   <td className="center">{f.no_convocados}</td>
                   <td>
-                    <BarraPct pct={Math.round(f.pct_cumplimiento)} />
+                    <BarraPct pct={Math.round(f.pct_cumplimiento)} titulo={tituloCumplimientoOperativo(f)} />
                   </td>
                 </tr>
               ))
