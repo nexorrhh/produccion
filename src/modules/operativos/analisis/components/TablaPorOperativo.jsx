@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { diaDe, fmtFecha } from '../lib/formatoFecha'
 import { CumplimientoBarra } from '../../components/CumplimientoBarra'
+import { DetalleOperativoModal } from './DetalleOperativoModal'
+import { useDetalleOperativo } from '../hooks/useDetalleOperativo'
 
 const LIMITE = 10
 
@@ -8,6 +10,8 @@ export function TablaPorOperativo({ filas }) {
   const [filtroTipo, setFiltroTipo] = useState('todos')
   const [busqueda, setBusqueda] = useState('')
   const [expandido, setExpandido] = useState(false)
+  const [fechaSeleccionada, setFechaSeleccionada] = useState(null)
+  const { detalle, cargando: cargandoDetalle, error: errorDetalle } = useDetalleOperativo(fechaSeleccionada)
 
   const filtradas = useMemo(() => {
     let lista = [...filas]
@@ -64,7 +68,7 @@ export function TablaPorOperativo({ filas }) {
           <tbody>
             {visibles.length ? (
               visibles.map((f) => (
-                <tr key={f.fecha}>
+                <tr key={f.fecha} className="an-fila-clickeable" onClick={() => setFechaSeleccionada(f.fecha)}>
                   <td>{fmtFecha(f.fecha)}</td>
                   <td>{f.dia_semana || diaDe(f.fecha)}</td>
                   <td>{f.tipo === 'Sabado' ? 'Sábado' : f.tipo}</td>
@@ -102,6 +106,16 @@ export function TablaPorOperativo({ filas }) {
             {expandido ? 'Ver menos' : `Ver más — ${filtradas.length - LIMITE} operativos más`}
           </button>
         </div>
+      )}
+
+      {fechaSeleccionada && (
+        <DetalleOperativoModal
+          fecha={fechaSeleccionada}
+          detalle={detalle}
+          cargando={cargandoDetalle}
+          error={errorDetalle}
+          onCerrar={() => setFechaSeleccionada(null)}
+        />
       )}
     </div>
   )

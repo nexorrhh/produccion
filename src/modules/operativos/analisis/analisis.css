@@ -265,3 +265,89 @@
   text-align: center;
   margin-top: 12px;
 }
+
+.an-fila-clickeable {
+  cursor: pointer;
+}
+
+/* Modal de detalle de un operativo puntual */
+.det-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  z-index: 100;
+  overflow-y: auto;
+}
+.det-panel {
+  width: 100%;
+  max-width: 760px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 24px;
+}
+.det-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.det-titulo {
+  font-size: 16px;
+  font-weight: 700;
+}
+.det-sub {
+  font-size: 12.5px;
+  color: var(--text2);
+  margin-top: 2px;
+}
+.det-tabla-wrap {
+  max-height: 60vh;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.det-tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+.det-tabla thead th {
+  position: sticky;
+  top: 0;
+  background: var(--bg-soft);
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.det-tabla thead th.center {
+  text-align: center;
+}
+.det-tabla tbody td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 13px;
+}
+.det-tabla tbody td.center {
+  text-align: center;
+}
+.det-tabla tbody tr:last-child td {
+  border-bottom: none;
+}
+.det-situacion {
+  display: inline-flex;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
