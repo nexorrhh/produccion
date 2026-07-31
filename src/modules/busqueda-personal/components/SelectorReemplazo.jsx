@@ -26,7 +26,7 @@ export function SelectorReemplazo({ personal, cargando, seleccionado, onSeleccio
     return (
       <div className="bp-reemplazo-elegido">
         <span>
-          {seleccionado.nombre} ·{' '}
+          {seleccionado.apellido_y_nombre} ·{' '}
           {seleccionado.empresa === 'CIMOMET' ? 'Cimomet' : 'Co.mo.ing'} · legajo {seleccionado.legajo}
         </span>
         <button type="button" className="btn btn-ghost" onClick={onQuitar}>
