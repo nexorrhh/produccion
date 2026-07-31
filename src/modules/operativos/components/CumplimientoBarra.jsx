@@ -32,7 +32,7 @@ export function CumplimientoBarra({ pct, presentes, ausentes, noConvocados, tota
         </div>
         <div className="cmp-tooltip-row">
           <span className="cmp-dot cmp-dot-gris" />
-          Sin ser convocad@s
+          Sin ser convocados
           <b>{noConvocados}</b>
         </div>
         <div className="cmp-tooltip-divider" />
