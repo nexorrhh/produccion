@@ -357,32 +357,26 @@
   flex-shrink: 0;
 }
 
-/* Vista de impresión: oculta en pantalla, se muestra solo al imprimir */
+/* Vista de impresión: oculta en pantalla, se muestra solo al imprimir.
+   Se porta a document.body (fuera de #root — ver DetalleOperativoModal),
+   así que alcanza con ocultar #root entero: nada de "esconder todo con
+   visibility" (eso deja el contenido invisible pero ocupando su alto
+   normal, y el navegador termina paginando de más). */
 .det-print-only {
   display: none;
 }
 
+@page {
+  size: A4 landscape;
+  margin: 12mm 10mm;
+}
+
 @media print {
-  body * {
-    visibility: hidden;
-  }
-  .det-print-only,
-  .det-print-only * {
-    visibility: visible;
+  #root {
+    display: none !important;
   }
   .det-print-only {
     display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    padding: 0;
-  }
-  .det-overlay {
-    position: static;
-    background: none;
-    padding: 0;
-    overflow: visible;
   }
 }
 
@@ -410,8 +404,7 @@
 }
 
 .det-print-grupo {
-  margin-bottom: 16px;
-  page-break-inside: avoid;
+  margin-bottom: 10px;
 }
 .det-print-grupo-titulo {
   font-size: 12px;
@@ -421,25 +414,61 @@
   padding: 4px 0;
   margin-bottom: 4px;
   border-bottom: 1.5px solid #0f172a;
+  page-break-after: avoid;
 }
 .det-print-tabla {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
+}
+.det-print-tabla th:nth-child(1),
+.det-print-tabla td:nth-child(1) {
+  width: 8%;
+}
+.det-print-tabla th:nth-child(2),
+.det-print-tabla td:nth-child(2) {
+  width: 22%;
+}
+.det-print-tabla th:nth-child(3),
+.det-print-tabla td:nth-child(3) {
+  width: 12%;
+}
+.det-print-tabla th:nth-child(4),
+.det-print-tabla td:nth-child(4) {
+  width: 18%;
+}
+.det-print-tabla th:nth-child(5),
+.det-print-tabla td:nth-child(5) {
+  width: 10%;
+}
+.det-print-tabla th:nth-child(6),
+.det-print-tabla td:nth-child(6) {
+  width: 10%;
+}
+.det-print-tabla th:nth-child(7),
+.det-print-tabla td:nth-child(7) {
+  width: 20%;
 }
 .det-print-tabla th {
   text-align: left;
-  font-size: 9.5px;
+  font-size: 8.5px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   color: #475569;
-  padding: 3px 6px;
+  padding: 2px 5px;
   border-bottom: 1px solid #cbd5e1;
+  white-space: nowrap;
+  overflow: hidden;
 }
 .det-print-tabla td {
-  font-size: 11px;
-  padding: 3px 6px;
+  font-size: 10px;
+  line-height: 1.3;
+  padding: 1.5px 5px;
   border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .det-print-tabla tr {
   page-break-inside: avoid;

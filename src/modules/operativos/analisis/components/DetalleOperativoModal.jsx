@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { fmtFecha } from '../lib/formatoFecha'
 import { tipoPago } from '../../lib/clasificacion'
 import { TIPOS_PUESTO } from '../../lib/tiposPuesto'
@@ -39,6 +40,7 @@ export function DetalleOperativoModal({ fecha, detalle, mapaClasif, cargando, er
   }
 
   return (
+    <>
     <div className="det-overlay" onClick={onCerrar}>
       <div className="det-panel" onClick={(e) => e.stopPropagation()}>
         <div className="det-header">
@@ -114,13 +116,19 @@ export function DetalleOperativoModal({ fecha, detalle, mapaClasif, cargando, er
           </div>
         )}
       </div>
+    </div>
 
-      {/* Vista de impresión — oculta en pantalla, visible solo al imprimir
-          (ver .det-print-only en analisis.css). Optimizada para entregar
-          en papel: agrupada Quincenal/Mensual/Sin clasificar, ordenada por
-          apellido, sin columnas que no le sirven a un supervisor en mano
-          (sin cumplimiento, sin "situación" pendiente de marcar). */}
-      {detalle && (
+    {/* Vista de impresión — no es hija de .det-overlay: se porta a
+        document.body para quedar fuera del árbol de la app. Así, al
+        imprimir, alcanza con ocultar #root entero (una sola regla) y no
+        hace falta apagar cada elemento con visibility (eso dejaba todo el
+        contenido invisible pero ocupando su alto normal, y el navegador
+        paginaba de más). Optimizada para entregar en papel: agrupada
+        Quincenal/Mensual/Sin clasificar, ordenada por apellido, sin
+        columnas que no le sirven a un supervisor en mano (cumplimiento,
+        situación pendiente). */}
+    {detalle &&
+      createPortal(
         <div className="det-print-only">
           <div className="det-print-header">
             <div className="det-print-empresa">Cimomet S.A. &amp; Co.mo.ing S.R.L.</div>
@@ -164,8 +172,9 @@ export function DetalleOperativoModal({ fecha, detalle, mapaClasif, cargando, er
               </table>
             </div>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
-    </div>
+    </>
   )
 }
