@@ -1,5 +1,12 @@
 import { key, norm, tipoPago } from '../lib/clasificacion'
 import { TIPOS_PUESTO } from '../lib/tiposPuesto'
+import { flechaOrden, ordenarFilas, useOrdenTabla } from '../../../app/lib/ordenarTabla'
+
+function valorOrden(e, campo) {
+  if (campo === 'legajo') return e.legajo
+  if (campo === 'empresa') return e.empresa
+  return e.apellido_y_nombre
+}
 
 export function OperativosTable({
   empleados,
@@ -12,6 +19,8 @@ export function OperativosTable({
   onSetTurno,
   onSetCampo,
 }) {
+  const { campo, direccion, alternar } = useOrdenTabla()
+
   const txt = norm(filtros.search)
   const lista = empleados.filter((e) => {
     if (filtros.empresa && e.empresa !== filtros.empresa) return false
@@ -27,7 +36,7 @@ export function OperativosTable({
       <div className="op-table-container">
         <table>
           <thead>
-            <HeaderRow />
+            <HeaderRow campo={campo} direccion={direccion} onOrdenar={alternar} />
           </thead>
           <tbody>
             <tr className="op-state-row">
@@ -43,14 +52,19 @@ export function OperativosTable({
     tipo: t.key,
     clase: t.cssClass,
     titulo: t.labelPlural,
-    items: lista.filter((e) => tipoPago(e, mapaClasif) === t.key),
+    items: ordenarFilas(
+      lista.filter((e) => tipoPago(e, mapaClasif) === t.key),
+      campo,
+      direccion,
+      (e) => valorOrden(e, campo)
+    ),
   })).filter((g) => g.items.length)
 
   return (
     <div className="op-table-container">
       <table>
         <thead>
-          <HeaderRow />
+          <HeaderRow campo={campo} direccion={direccion} onOrdenar={alternar} />
         </thead>
         <tbody>
           {grupos.map((g) => (
@@ -70,15 +84,21 @@ export function OperativosTable({
   )
 }
 
-function HeaderRow() {
+function HeaderRow({ campo, direccion, onOrdenar }) {
   return (
     <tr>
       <th className="center" style={{ width: 50 }}>
         Citar
       </th>
-      <th style={{ width: 70 }}>Legajo</th>
-      <th>Apellido y nombre</th>
-      <th style={{ width: 90 }}>Empresa</th>
+      <th style={{ width: 70, cursor: 'pointer' }} onClick={() => onOrdenar('legajo')}>
+        Legajo{flechaOrden('legajo', campo, direccion)}
+      </th>
+      <th style={{ cursor: 'pointer' }} onClick={() => onOrdenar('apellido_y_nombre')}>
+        Apellido y nombre{flechaOrden('apellido_y_nombre', campo, direccion)}
+      </th>
+      <th style={{ width: 90, cursor: 'pointer' }} onClick={() => onOrdenar('empresa')}>
+        Empresa{flechaOrden('empresa', campo, direccion)}
+      </th>
       <th>Puesto</th>
       <th className="center" style={{ width: 60 }}>
         07-12

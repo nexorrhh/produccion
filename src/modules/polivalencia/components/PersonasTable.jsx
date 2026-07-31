@@ -1,14 +1,22 @@
 import { useMemo, useState } from 'react'
+import { flechaOrden, ordenarFilas, useOrdenTabla } from '../../../app/lib/ordenarTabla'
 
 function fmtFecha(iso) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString('es-AR')
 }
 
+function valorOrden(f, campo) {
+  if (campo === 'legajo') return f.empleado.legajo
+  if (campo === 'empresa') return f.empleado.empresa
+  return f.empleado.apellido_y_nombre
+}
+
 export function PersonasTable({ filas, onAbrir }) {
   const [empresa, setEmpresa] = useState('')
   const [puesto, setPuesto] = useState('')
   const [busqueda, setBusqueda] = useState('')
+  const { campo, direccion, alternar } = useOrdenTabla()
 
   const puestos = useMemo(
     () => [...new Set(filas.map((f) => f.empleado.desc_puesto).filter(Boolean))].sort(),
@@ -29,6 +37,11 @@ export function PersonasTable({ filas, onAbrir }) {
     }
     return lista
   }, [filas, empresa, puesto, busqueda])
+
+  const ordenadas = useMemo(
+    () => ordenarFilas(filtradas, campo, direccion, (f) => valorOrden(f, campo)),
+    [filtradas, campo, direccion]
+  )
 
   return (
     <div>
@@ -72,9 +85,15 @@ export function PersonasTable({ filas, onAbrir }) {
           <table>
             <thead>
               <tr>
-                <th style={{ width: 70 }}>Legajo</th>
-                <th>Apellido y nombre</th>
-                <th style={{ width: 90 }}>Empresa</th>
+                <th style={{ width: 70, cursor: 'pointer' }} onClick={() => alternar('legajo')}>
+                  Legajo{flechaOrden('legajo', campo, direccion)}
+                </th>
+                <th style={{ cursor: 'pointer' }} onClick={() => alternar('apellido_y_nombre')}>
+                  Apellido y nombre{flechaOrden('apellido_y_nombre', campo, direccion)}
+                </th>
+                <th style={{ width: 90, cursor: 'pointer' }} onClick={() => alternar('empresa')}>
+                  Empresa{flechaOrden('empresa', campo, direccion)}
+                </th>
                 <th>Puesto</th>
                 <th style={{ width: 90 }} className="center">
                   Asignados
@@ -85,7 +104,7 @@ export function PersonasTable({ filas, onAbrir }) {
               </tr>
             </thead>
             <tbody>
-              {filtradas.map((f) => (
+              {ordenadas.map((f) => (
                 <tr key={f.empleado.legajo + '|' + f.empleado.empresa} className={f.estado.alerta ? 'pv-row-alerta' : ''}>
                   <td>
                     <span className="pv-legajo-num">{f.empleado.legajo}</span>

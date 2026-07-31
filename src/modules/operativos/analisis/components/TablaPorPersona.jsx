@@ -1,5 +1,12 @@
 import { useMemo, useState } from 'react'
 import { colorPct } from '../lib/formatoFecha'
+import { flechaOrden, ordenarFilas, useOrdenTabla } from '../../../../app/lib/ordenarTabla'
+
+function valorOrden(p, campo) {
+  if (campo === 'legajo') return p.legajo
+  if (campo === 'empresa') return p.empresa
+  return p.apellido_y_nombre
+}
 
 const LIMITE = 10
 
@@ -22,6 +29,7 @@ export function TablaPorPersona({ filas }) {
   const [puesto, setPuesto] = useState('')
   const [busqueda, setBusqueda] = useState('')
   const [expandido, setExpandido] = useState(false)
+  const { campo, direccion, alternar } = useOrdenTabla()
 
   const puestos = useMemo(
     () => [...new Set(filas.map((p) => p.desc_puesto).filter(Boolean))].sort(),
@@ -41,7 +49,12 @@ export function TablaPorPersona({ filas }) {
     return lista
   }, [filas, empresa, puesto, busqueda])
 
-  const visibles = expandido ? filtradas : filtradas.slice(0, LIMITE)
+  const ordenadas = useMemo(
+    () => ordenarFilas(filtradas, campo, direccion, (p) => valorOrden(p, campo)),
+    [filtradas, campo, direccion]
+  )
+
+  const visibles = expandido ? ordenadas : ordenadas.slice(0, LIMITE)
 
   return (
     <div>
@@ -78,9 +91,15 @@ export function TablaPorPersona({ filas }) {
         <table>
           <thead>
             <tr>
-              <th>Legajo</th>
-              <th>Apellido y nombre</th>
-              <th>Empresa</th>
+              <th style={{ cursor: 'pointer' }} onClick={() => alternar('legajo')}>
+                Legajo{flechaOrden('legajo', campo, direccion)}
+              </th>
+              <th style={{ cursor: 'pointer' }} onClick={() => alternar('apellido_y_nombre')}>
+                Apellido y nombre{flechaOrden('apellido_y_nombre', campo, direccion)}
+              </th>
+              <th style={{ cursor: 'pointer' }} onClick={() => alternar('empresa')}>
+                Empresa{flechaOrden('empresa', campo, direccion)}
+              </th>
               <th className="center">Conv.</th>
               <th className="center">Pres.</th>
               <th className="center">Aus.</th>
