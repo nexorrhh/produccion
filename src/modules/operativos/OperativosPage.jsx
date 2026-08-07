@@ -3,12 +3,19 @@ import { SetupBar, diaDeFecha, tipoSugerido } from './components/SetupBar'
 import { Toolbar } from './components/Toolbar'
 import { OperativosTable } from './components/OperativosTable'
 import { ActionBar } from './components/ActionBar'
+import { NotificacionesModal } from './components/NotificacionesModal'
+import { PlanillaImprimible } from './components/PlanillaImprimible'
 import { Toast } from '../../app/components/Toast'
 import { AnalisisOperativos } from './analisis/AnalisisOperativos'
+import { ValidacionOperativos } from './validacion/ValidacionOperativos'
 import { useOperativosData } from './hooks/useOperativosData'
 import { useCitacionDeFecha } from './hooks/useCitacionDeFecha'
+import { useAuth } from '../../app/auth/useAuth'
 import { key, tipoPago } from './lib/clasificacion'
 import { exportarCSV } from './lib/csvExport'
+import { generarPdfListadoConvocados } from './lib/pdfListadoConvocados'
+import { puedeValidar, esVistaAdmin } from './lib/permisos'
+import { supabase } from '../../app/supabaseClient'
 import './operativos.css'
 
 function proximoSabado() {
@@ -20,6 +27,7 @@ function proximoSabado() {
 }
 
 export function OperativosPage() {
+  const { user } = useAuth()
   const { empleados, cumplimiento, mapaClasif, status, statusText } = useOperativosData()
 
   const [fecha, setFecha] = useState(proximoSabado)
@@ -29,11 +37,17 @@ export function OperativosPage() {
   const [guardando, setGuardando] = useState(false)
   const [toast, setToast] = useState(null)
   const [vistaPrincipal, setVistaPrincipal] = useState('citar')
+  const [mostrarNotificaciones, setMostrarNotificaciones] = useState(false)
+  const [imprimiendoPlanilla, setImprimiendoPlanilla] = useState(false)
 
   const {
     seleccion,
+    citacionId,
     estadoTexto,
+    validacion,
     guardar,
+    aprobar,
+    rechazar,
     copiarUltima,
     limpiar,
     toggleCitar,
@@ -42,6 +56,10 @@ export function OperativosPage() {
   } = useCitacionDeFecha(fecha, empleados)
 
   const dia = diaDeFecha(fecha)
+  const vistaAdmin = esVistaAdmin(user)
+  // Los supervisores de planta solo tienen Citar — si por algún resto de
+  // estado quedaran en otra pestaña, esto los vuelve a Citar sin drama.
+  const vistaEfectiva = vistaAdmin ? vistaPrincipal : 'citar'
 
   function mostrarToast(msg, tipoToast = '') {
     setToast({ msg, tipo: tipoToast })
@@ -82,16 +100,71 @@ export function OperativosPage() {
     }
   }, [seleccion, empleados, mapaClasif])
 
+  // Guardar deja la citación en "pendiente_validacion" — el mail oficial
+  // recién se dispara cuando Javier/Valentín la aprueba (handleAprobar).
   async function handleGuardar() {
     setGuardando(true)
     try {
-      const n = await guardar(tipo, dia)
-      mostrarToast('Citación guardada: ' + n + ' personas', 'ok')
+      const { detalle } = await guardar(tipo, dia, user)
+      mostrarToast('Citación guardada: ' + detalle.length + ' personas — pendiente de validación', 'ok')
     } catch (err) {
       mostrarToast('Error: ' + err.message, 'error')
     } finally {
       setGuardando(false)
     }
+  }
+
+  async function handleAprobar() {
+    setGuardando(true)
+    try {
+      const sels = Object.keys(seleccion)
+      const detalle = sels.map((k) => {
+        const e = empleados.find((x) => key(x) === k)
+        const s = seleccion[k]
+        return {
+          legajo: e.legajo,
+          empresa: e.empresa,
+          apellido_y_nombre: e.apellido_y_nombre,
+          desc_puesto: e.desc_puesto,
+          turno_manana: !!s.manana,
+          turno_tarde: !!s.tarde,
+          ot: s.ot || null,
+          trabajo: s.trabajo || null,
+        }
+      })
+      const pdfBase64 = generarPdfListadoConvocados({ fecha, dia, tipo, detalle, mapaClasif })
+      const { data, error } = await supabase.functions.invoke('enviar-listado-convocados', {
+        body: { fecha, tipo, diaSemana: dia, cantidad: detalle.length, pdfBase64 },
+      })
+      if (error) throw new Error(error.message)
+      await aprobar(user.id)
+      mostrarToast('Listado aprobado y enviado a ' + (data?.enviados ?? 0) + ' destinatario(s)', 'ok')
+    } catch (err) {
+      mostrarToast('No se pudo enviar el mail, la citación sigue pendiente: ' + err.message, 'error')
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  async function handleRechazar() {
+    const comentario = window.prompt('¿Por qué se rechaza esta citación? (se lo va a ver quien la cargó)')
+    if (comentario === null) return
+    if (!comentario.trim()) {
+      mostrarToast('El comentario de rechazo no puede estar vacío', 'error')
+      return
+    }
+    try {
+      await rechazar(user.id, comentario.trim())
+      mostrarToast('Citación rechazada', 'ok')
+    } catch (err) {
+      mostrarToast('Error: ' + err.message, 'error')
+    }
+  }
+
+  function handleAbrirValidacion(fechaElegida) {
+    setFecha(fechaElegida)
+    setTipo(tipoSugerido(fechaElegida))
+    setVistaPrincipal('citar')
   }
 
   function handleLimpiar() {
@@ -131,23 +204,55 @@ export function OperativosPage() {
 
   return (
     <div className="wrap">
-      <div className="op-tabs">
-        <button className={vistaPrincipal === 'citar' ? 'active' : ''} onClick={() => setVistaPrincipal('citar')}>
-          Citar
-        </button>
-        <button className={vistaPrincipal === 'analisis' ? 'active' : ''} onClick={() => setVistaPrincipal('analisis')}>
-          Análisis
-        </button>
-      </div>
+      {vistaAdmin && (
+        <div className="op-tabs">
+          <button className={vistaEfectiva === 'citar' ? 'active' : ''} onClick={() => setVistaPrincipal('citar')}>
+            Citar
+          </button>
+          <button className={vistaEfectiva === 'analisis' ? 'active' : ''} onClick={() => setVistaPrincipal('analisis')}>
+            Análisis
+          </button>
+          <button className={vistaEfectiva === 'validacion' ? 'active' : ''} onClick={() => setVistaPrincipal('validacion')}>
+            Validación
+          </button>
+          <div className="op-tabs-spacer">
+            <button className="btn btn-ghost" onClick={() => setMostrarNotificaciones(true)}>
+              Destinatarios del listado
+            </button>
+          </div>
+        </div>
+      )}
 
-      {vistaPrincipal === 'analisis' ? (
+      {mostrarNotificaciones && <NotificacionesModal onCerrar={() => setMostrarNotificaciones(false)} />}
+
+      {vistaEfectiva === 'analisis' ? (
         <AnalisisOperativos />
+      ) : vistaEfectiva === 'validacion' ? (
+        <ValidacionOperativos onAbrir={handleAbrirValidacion} />
       ) : (
         <>
           <div className="op-status-line">
             <span className={'op-status-dot ' + status} />
             {statusText}
           </div>
+
+          {validacion.estado && (
+            <div
+              className={
+                'op-estado-banner ' +
+                (validacion.estado === 'validada'
+                  ? 'validada'
+                  : validacion.estado === 'rechazada'
+                    ? 'rechazada'
+                    : 'pendiente')
+              }
+            >
+              {validacion.estado === 'validada' && '✓ Validada y enviada'}
+              {validacion.estado === 'pendiente_validacion' && '⏳ Pendiente de validación'}
+              {validacion.estado === 'rechazada' &&
+                '✕ Rechazada' + (validacion.comentarioRechazo ? ': ' + validacion.comentarioRechazo : '')}
+            </div>
+          )}
 
           <SetupBar
             fecha={fecha}
@@ -178,9 +283,23 @@ export function OperativosPage() {
             onLimpiar={handleLimpiar}
             onCopiarUltima={handleCopiarUltima}
             onExportarCSV={handleExportarCSV}
+            onImprimirPlanilla={() => setImprimiendoPlanilla(true)}
             onGuardar={handleGuardar}
             guardando={guardando}
+            puedeValidar={puedeValidar(user)}
+            estadoValidacion={validacion.estado}
+            citacionId={citacionId}
+            onAprobar={handleAprobar}
+            onRechazar={handleRechazar}
           />
+
+          {imprimiendoPlanilla && (
+            <PlanillaImprimible
+              empleados={empleados}
+              mapaClasif={mapaClasif}
+              onListo={() => setImprimiendoPlanilla(false)}
+            />
+          )}
 
           <Toast toast={toast} />
         </>

@@ -17,6 +17,9 @@ export const moduleRegistry = [
     label: 'Búsqueda de Personal',
     path: '/busqueda-personal',
     element: <BusquedaPersonalPage />,
+    // Por ahora la maneja Javier — los supervisores de planta
+    // (Carlos/Leonardo) no la ven en el menú. undefined = visible a todos.
+    roles: ['gerente_produccion', 'admin_sistema'],
   },
   {
     key: 'polivalencia',

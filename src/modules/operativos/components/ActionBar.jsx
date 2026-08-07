@@ -1,4 +1,20 @@
-export function ActionBar({ estadoTexto, citadosCount, onLimpiar, onCopiarUltima, onExportarCSV, onGuardar, guardando }) {
+export function ActionBar({
+  estadoTexto,
+  citadosCount,
+  onLimpiar,
+  onCopiarUltima,
+  onExportarCSV,
+  onImprimirPlanilla,
+  onGuardar,
+  guardando,
+  puedeValidar,
+  estadoValidacion,
+  citacionId,
+  onAprobar,
+  onRechazar,
+}) {
+  const mostrarValidacion =
+    puedeValidar && citacionId && (estadoValidacion === 'pendiente_validacion' || estadoValidacion === 'rechazada')
   return (
     <div className="op-action-bar">
       <div className="op-action-info">
@@ -29,6 +45,14 @@ export function ActionBar({ estadoTexto, citadosCount, onLimpiar, onCopiarUltima
         </svg>
         Exportar CSV
       </button>
+      <button className="btn" onClick={onImprimirPlanilla} title="Planilla en blanco para citar en papel">
+        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+          <polyline points="6 9 6 2 18 2 18 9" />
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+          <rect x="6" y="14" width="12" height="8" />
+        </svg>
+        Imprimir planilla
+      </button>
       <button className="btn btn-green" onClick={onGuardar} disabled={guardando}>
         <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
           <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
@@ -37,6 +61,24 @@ export function ActionBar({ estadoTexto, citadosCount, onLimpiar, onCopiarUltima
         </svg>
         {guardando ? 'Guardando…' : 'Guardar citación'}
       </button>
+      {mostrarValidacion && (
+        <>
+          <button className="btn btn-danger" onClick={onRechazar} disabled={guardando}>
+            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M15 9l-6 6M9 9l6 6" />
+            </svg>
+            Rechazar
+          </button>
+          <button className="btn btn-green" onClick={onAprobar} disabled={guardando}>
+            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            {guardando ? 'Enviando…' : 'Aprobar y enviar'}
+          </button>
+        </>
+      )}
     </div>
   )
 }

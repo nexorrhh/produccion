@@ -192,9 +192,11 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
+  overflow-x: auto;
 }
 .op-table-container table {
   width: 100%;
+  min-width: 760px;
   border-collapse: separate;
   border-spacing: 0;
 }
@@ -408,6 +410,40 @@
   }
 }
 
+/* Uso táctil (tablet, ej. iPad ~1024px) — Carlos carga la citación desde
+   ahí. La tabla ya scrollea sola (overflow-x en .op-table-container), esto
+   agranda los controles para que sean cómodos con el dedo. */
+@media (max-width: 1100px) {
+  .op-chk {
+    width: 26px;
+    height: 26px;
+  }
+  .op-inp-cell {
+    padding: 10px 10px;
+    font-size: 14.5px;
+  }
+  .op-table-container thead th,
+  .op-table-container tbody td {
+    padding: 13px 14px;
+  }
+  .op-search-wrap input,
+  .op-filter {
+    padding: 12px 14px;
+    font-size: 15px;
+  }
+  .op-search-wrap input {
+    padding-left: 40px;
+  }
+  .op-chip-toggle button {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  .op-action-bar .btn {
+    padding: 12px 18px;
+    font-size: 14px;
+  }
+}
+
 /* TABS de nivel superior (Citar / Análisis) */
 .op-tabs {
   display: flex;
@@ -415,7 +451,7 @@
   margin-bottom: 16px;
   border-bottom: 1px solid var(--border);
 }
-.op-tabs button {
+.op-tabs > button {
   padding: 9px 16px;
   border: none;
   background: transparent;
@@ -426,10 +462,10 @@
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
 }
-.op-tabs button:hover {
+.op-tabs > button:hover {
   color: var(--text);
 }
-.op-tabs button.active {
+.op-tabs > button.active {
   color: var(--com);
   border-bottom-color: var(--com);
 }
@@ -508,4 +544,292 @@
   padding-left: 14px;
   color: #fff;
   font-size: 13px;
+}
+
+/* Botón "Destinatarios del listado" en la fila de tabs */
+.op-tabs-spacer {
+  margin-left: auto;
+  align-self: center;
+}
+
+/* Modal de configuración de destinatarios del mail (Operativos) */
+.noti-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  z-index: 100;
+  overflow-y: auto;
+}
+.noti-panel {
+  width: 100%;
+  max-width: 480px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 24px;
+}
+.noti-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.noti-titulo {
+  font-size: 16px;
+  font-weight: 700;
+}
+.noti-sub {
+  font-size: 12.5px;
+  color: var(--text2);
+  margin-top: 4px;
+  max-width: 320px;
+}
+.noti-error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #b91c1c;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  font-size: 12.5px;
+  margin-bottom: 12px;
+}
+.noti-vacio {
+  color: var(--text3);
+  font-size: 13px;
+  padding: 12px 0;
+}
+.noti-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 16px;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+.noti-fila {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--border);
+}
+.noti-fila.inactivo {
+  opacity: 0.5;
+}
+.noti-fila-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.noti-fila-email {
+  font-size: 13.5px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.noti-fila-nombre {
+  font-size: 11.5px;
+  color: var(--text2);
+}
+.noti-fila-estado {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.noti-form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+.noti-form input {
+  flex: 1 1 160px;
+  padding: 9px 12px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  font-size: 13px;
+}
+
+/* Planilla imprimible en blanco (personal quincenal/mensual, para tildar a
+   mano en planta) — autocontenido acá porque este componente vive en el
+   módulo raíz de Operativos, no en el submódulo de Análisis.
+   Va en dos columnas lado a lado (repartidas por cantidad de renglones en
+   PlanillaImprimible.jsx) para que TODO el plantel entre en una sola hoja
+   A4, sin importar cuánta gente haya — con una sola columna vertical un
+   plantel grande no entraba en una hoja aunque se achicara la letra. */
+.op-print-only {
+  display: none;
+}
+
+@page {
+  size: A4 portrait;
+  margin: 8mm 7mm;
+}
+
+@media print {
+  #root {
+    display: none !important;
+  }
+  .op-print-only {
+    display: block;
+  }
+}
+
+.op-print-header {
+  text-align: center;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 2px solid #0f172a;
+}
+.op-print-empresa {
+  font-size: 8.5px;
+  font-weight: 600;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.op-print-header h1 {
+  font-size: 14px;
+  font-weight: 800;
+  margin: 2px 0 1px;
+}
+.op-print-sub {
+  font-size: 9px;
+  color: #475569;
+}
+
+.op-print-columnas {
+  display: flex;
+  gap: 5mm;
+  align-items: flex-start;
+}
+.op-print-columna {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.op-print-columna + .op-print-columna {
+  border-left: 1px solid #cbd5e1;
+  padding-left: 5mm;
+}
+
+.op-print-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.op-print-th-casilla,
+.op-print-td-casilla {
+  width: 8%;
+}
+.op-print-tabla th:nth-child(2),
+.op-print-tabla td:nth-child(2) {
+  width: 11%;
+}
+.op-print-tabla th:nth-child(3),
+.op-print-tabla td:nth-child(3) {
+  width: 39%;
+}
+.op-print-tabla th:nth-child(4),
+.op-print-tabla td:nth-child(4) {
+  width: 15%;
+}
+.op-print-tabla th:nth-child(5),
+.op-print-tabla td:nth-child(5) {
+  width: 27%;
+}
+.op-print-tabla th {
+  text-align: left;
+  font-size: 8.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: #475569;
+  padding: 0 3px 1.5px;
+  border-bottom: 1px solid #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.op-print-tabla td {
+  font-size: 11.5px;
+  line-height: 1.08;
+  padding: 0.6px 3px;
+  border-bottom: 0.5px solid #e2e8f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.op-print-tabla tr {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.op-print-grupo-fila td {
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 3px 2px;
+  border-bottom: 1px solid #0f172a;
+  overflow: visible;
+}
+.op-print-casilla {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border: 1.2px solid #0f172a;
+}
+
+/* Pestaña Validación — cola de citaciones pendientes/rechazadas */
+.val-tabla-wrap {
+  margin-bottom: 20px;
+}
+.val-fila {
+  cursor: pointer;
+}
+.val-estado {
+  display: inline-flex;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.val-estado-pendiente {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+}
+.val-estado-rechazada {
+  background: rgba(239, 68, 68, 0.1);
+  color: #b91c1c;
+}
+
+/* Banner de estado de la citación cargada en Citar */
+.op-estado-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+.op-estado-banner.pendiente {
+  background: rgba(245, 158, 11, 0.1);
+  color: #92400e;
+}
+.op-estado-banner.validada {
+  background: rgba(34, 197, 94, 0.1);
+  color: #166534;
+}
+.op-estado-banner.rechazada {
+  background: rgba(239, 68, 68, 0.1);
+  color: #991b1b;
 }

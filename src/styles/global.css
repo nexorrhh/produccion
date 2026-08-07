@@ -72,6 +72,14 @@ a {
 .btn-ghost {
   background: transparent;
 }
+.btn-danger {
+  background: #dc2626;
+  color: #fff;
+  border-color: #dc2626;
+}
+.btn-danger:hover {
+  background: #b91c1c;
+}
 
 .badge {
   display: inline-flex;

@@ -2,13 +2,27 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../../app/supabaseClient'
 import { key } from '../lib/clasificacion'
 
+const VALIDACION_VACIA = {
+  estado: null,
+  creadoPor: null,
+  creadoPorNombre: null,
+  validadoPor: null,
+  validadoEn: null,
+  rechazadoPor: null,
+  rechazadoEn: null,
+  comentarioRechazo: null,
+}
+
 // Puerto de cargarCitacionDeFecha()/guardarCitacion()/copiarUltimaCitacion()
-// de docs/reference/citaciones.html. No cambia el esquema de `citaciones`
-// ni `citacion_detalle` — escribe las mismas columnas que ya usa el HTML.
+// de docs/reference/citaciones.html, más el flujo de validación (Carlos
+// carga → Javier/Valentín aprueba o rechaza). No cambia el esquema base de
+// `citaciones`/`citacion_detalle` — solo usa las columnas nuevas de
+// 0007_operativos_flujo_validacion.sql para el estado de validación.
 export function useCitacionDeFecha(fecha, empleados) {
   const [seleccion, setSeleccion] = useState({})
   const [citacionId, setCitacionId] = useState(null)
   const [estadoTexto, setEstadoTexto] = useState('')
+  const [validacion, setValidacion] = useState(VALIDACION_VACIA)
 
   useEffect(() => {
     let cancelled = false
@@ -17,19 +31,22 @@ export function useCitacionDeFecha(fecha, empleados) {
       if (!fecha || !empleados.length) return
       setSeleccion({})
       setCitacionId(null)
+      setValidacion(VALIDACION_VACIA)
       try {
         const { data: cits } = await supabase
           .from('citaciones')
-          .select('id,estado')
+          .select(
+            'id,estado,creado_por,creado_por_nombre,validado_por,validado_en,rechazado_por,rechazado_en,comentario_rechazo'
+          )
           .eq('fecha', fecha)
         if (cancelled) return
 
         if (cits && cits.length) {
-          const id = cits[0].id
+          const cit = cits[0]
           const { data: det } = await supabase
             .from('citacion_detalle')
             .select('*')
-            .eq('citacion_id', id)
+            .eq('citacion_id', cit.id)
           if (cancelled) return
 
           const nueva = {}
@@ -41,8 +58,18 @@ export function useCitacionDeFecha(fecha, empleados) {
               trabajo: d.trabajo || '',
             }
           })
-          setCitacionId(id)
+          setCitacionId(cit.id)
           setSeleccion(nueva)
+          setValidacion({
+            estado: cit.estado,
+            creadoPor: cit.creado_por,
+            creadoPorNombre: cit.creado_por_nombre,
+            validadoPor: cit.validado_por,
+            validadoEn: cit.validado_en,
+            rechazadoPor: cit.rechazado_por,
+            rechazadoEn: cit.rechazado_en,
+            comentarioRechazo: cit.comentario_rechazo,
+          })
           setEstadoTexto('Citación existente (' + (det || []).length + ' personas) — editando')
         } else {
           setEstadoTexto('Nueva citación')
@@ -58,23 +85,42 @@ export function useCitacionDeFecha(fecha, empleados) {
     }
   }, [fecha, empleados])
 
-  async function guardar(tipo, dia) {
+  async function guardar(tipo, dia, usuario) {
     const sels = Object.keys(seleccion)
     if (!sels.length) throw new Error('No hay nadie citado')
 
     let citId = citacionId
 
+    // Cualquier guardado (alta o edición) vuelve a dejar la citación
+    // pendiente de validación — si ya estaba aprobada o rechazada, un
+    // cambio de contenido pide una revisión nueva.
     if (citId) {
       await supabase.from('citacion_detalle').delete().eq('citacion_id', citId)
       const { error } = await supabase
         .from('citaciones')
-        .update({ tipo, dia_semana: dia })
+        .update({
+          tipo,
+          dia_semana: dia,
+          estado: 'pendiente_validacion',
+          validado_por: null,
+          validado_en: null,
+          rechazado_por: null,
+          rechazado_en: null,
+          comentario_rechazo: null,
+        })
         .eq('id', citId)
       if (error) throw error
     } else {
       const { data, error } = await supabase
         .from('citaciones')
-        .insert({ fecha, tipo, dia_semana: dia, estado: 'abierta' })
+        .insert({
+          fecha,
+          tipo,
+          dia_semana: dia,
+          estado: 'pendiente_validacion',
+          creado_por: usuario.id,
+          creado_por_nombre: usuario.nombre_apellido,
+        })
         .select()
       if (error) throw error
       citId = data[0].id
@@ -101,8 +147,52 @@ export function useCitacionDeFecha(fecha, empleados) {
     const { error: detError } = await supabase.from('citacion_detalle').insert(detalle)
     if (detError) throw detError
 
+    setValidacion((prev) => ({
+      ...prev,
+      estado: 'pendiente_validacion',
+      creadoPor: prev.creadoPor || usuario.id,
+      creadoPorNombre: prev.creadoPorNombre || usuario.nombre_apellido,
+      validadoPor: null,
+      validadoEn: null,
+      rechazadoPor: null,
+      rechazadoEn: null,
+      comentarioRechazo: null,
+    }))
     setEstadoTexto('Citación guardada (' + detalle.length + ' personas)')
-    return detalle.length
+    return { citacionId: citId, detalle }
+  }
+
+  async function aprobar(usuarioId) {
+    if (!citacionId) throw new Error('No hay citación guardada para aprobar')
+    const validadoEn = new Date().toISOString()
+    const { error } = await supabase
+      .from('citaciones')
+      .update({ estado: 'validada', validado_por: usuarioId, validado_en: validadoEn })
+      .eq('id', citacionId)
+    if (error) throw error
+    setValidacion((prev) => ({ ...prev, estado: 'validada', validadoPor: usuarioId, validadoEn }))
+  }
+
+  async function rechazar(usuarioId, comentario) {
+    if (!citacionId) throw new Error('No hay citación guardada para rechazar')
+    const rechazadoEn = new Date().toISOString()
+    const { error } = await supabase
+      .from('citaciones')
+      .update({
+        estado: 'rechazada',
+        rechazado_por: usuarioId,
+        rechazado_en: rechazadoEn,
+        comentario_rechazo: comentario,
+      })
+      .eq('id', citacionId)
+    if (error) throw error
+    setValidacion((prev) => ({
+      ...prev,
+      estado: 'rechazada',
+      rechazadoPor: usuarioId,
+      rechazadoEn,
+      comentarioRechazo: comentario,
+    }))
   }
 
   async function copiarUltima(fechaActual) {
@@ -160,8 +250,12 @@ export function useCitacionDeFecha(fecha, empleados) {
 
   return {
     seleccion,
+    citacionId,
     estadoTexto,
+    validacion,
     guardar,
+    aprobar,
+    rechazar,
     copiarUltima,
     limpiar,
     toggleCitar,
