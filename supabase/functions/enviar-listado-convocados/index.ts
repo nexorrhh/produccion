@@ -22,18 +22,37 @@ import nodemailer from 'npm:nodemailer@6'
 
 const TIPO_LABEL: Record<string, string> = { Sabado: 'Sábado' }
 
+// El navegador manda un preflight OPTIONS antes del POST (supabase-js
+// agrega headers como "apikey"/"authorization", que no son "simples" para
+// CORS) — sin estos headers en TODAS las respuestas, el browser corta la
+// conexión antes de que la app vea siquiera el resultado real.
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+}
+
+function jsonResponse(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  })
+}
+
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Método no permitido' }), { status: 405 })
+    return jsonResponse({ error: 'Método no permitido' }, 405)
   }
 
   try {
     const { fecha, tipo, diaSemana, cantidad, pdfBase64 } = await req.json()
 
     if (!fecha || !pdfBase64 || !cantidad) {
-      return new Response(JSON.stringify({ error: 'Faltan datos del listado (fecha/cantidad/pdfBase64)' }), {
-        status: 400,
-      })
+      return jsonResponse({ error: 'Faltan datos del listado (fecha/cantidad/pdfBase64)' }, 400)
     }
 
     const supabaseAdmin = createClient(
@@ -48,10 +67,7 @@ Deno.serve(async (req) => {
 
     if (destErr) throw destErr
     if (!destinatarios || !destinatarios.length) {
-      return new Response(
-        JSON.stringify({ error: 'No hay destinatarios activos configurados en "Destinatarios del listado"' }),
-        { status: 422 }
-      )
+      return jsonResponse({ error: 'No hay destinatarios activos configurados en "Destinatarios del listado"' }, 422)
     }
 
     const transporter = nodemailer.createTransport({
@@ -85,12 +101,8 @@ Deno.serve(async (req) => {
       ],
     })
 
-    return new Response(JSON.stringify({ ok: true, enviados: destinatarios.length }), {
-      headers: { 'Content-Type': 'application/json' },
-    })
+    return jsonResponse({ ok: true, enviados: destinatarios.length })
   } catch (err) {
-    return new Response(JSON.stringify({ error: err instanceof Error ? err.message : String(err) }), {
-      status: 500,
-    })
+    return jsonResponse({ error: err instanceof Error ? err.message : String(err) }, 500)
   }
 })
