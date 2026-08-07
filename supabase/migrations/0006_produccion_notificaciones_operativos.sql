@@ -49,9 +49,9 @@ begin
   end if;
 
   return query
-    insert into produccion_config_notificaciones_operativos (email, nombre, creado_por)
+    insert into produccion_config_notificaciones_operativos as t (email, nombre, creado_por)
     values (lower(trim(p_email)), nullif(trim(p_nombre), ''), p_usuario_id)
-    returning id, email, nombre, activo;
+    returning t.id, t.email, t.nombre, t.activo;
 end;
 $$;
 
@@ -77,14 +77,14 @@ begin
   end if;
 
   return query
-    update produccion_config_notificaciones_operativos
+    update produccion_config_notificaciones_operativos as t
     set email = lower(trim(p_email)),
         nombre = nullif(trim(p_nombre), ''),
         activo = p_activo,
         modificado_por = p_usuario_id,
         modificado_en = now()
-    where id = p_id
-    returning id, email, nombre, activo;
+    where t.id = p_id
+    returning t.id, t.email, t.nombre, t.activo;
 end;
 $$;
 
