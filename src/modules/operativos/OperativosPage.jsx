@@ -136,7 +136,19 @@ export function OperativosPage() {
       const { data, error } = await supabase.functions.invoke('enviar-listado-convocados', {
         body: { fecha, tipo, diaSemana: dia, cantidad: detalle.length, pdfBase64 },
       })
-      if (error) throw new Error(error.message)
+      if (error) {
+        // supabase-js solo da un mensaje genérico ("Edge Function returned
+        // a non-2xx status code") — el detalle real está en el cuerpo de
+        // la respuesta, que queda en error.context.
+        let detalle = error.message
+        try {
+          const body = await error.context.json()
+          if (body?.error) detalle = body.error
+        } catch {
+          // si el cuerpo no es JSON, nos quedamos con error.message
+        }
+        throw new Error(detalle)
+      }
       await aprobar(user.id)
       mostrarToast('Listado aprobado y enviado a ' + (data?.enviados ?? 0) + ' destinatario(s)', 'ok')
     } catch (err) {
