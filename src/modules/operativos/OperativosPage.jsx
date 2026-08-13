@@ -75,19 +75,14 @@ export function OperativosPage() {
   // de perder algo marcado sin guardar.
   async function handleFechaChange(v) {
     if (citacionId) {
+      // Bloqueo directo, sin alternativa: no se puede mover la citación
+      // cargada a una fecha que ya tiene la suya propia (autorizada o no).
+      // Para ver/editar otra citación existente hay que hacerlo desde
+      // Validación (o limpiar/guardar la actual primero).
       try {
         await moverFecha(v)
         setFecha(v)
       } catch (err) {
-        // Conflicto = la fecha elegida ya tiene SU PROPIA citación real —
-        // seguramente el usuario quería ir a verla, no mover la actual ahí.
-        if (err.conflict) {
-          const abrir = confirm(
-            'Ya hay una citación guardada para esa fecha. ¿Querés abrirla (sin tocar la que tenés cargada ahora)?'
-          )
-          if (abrir) setFecha(v)
-          return
-        }
         mostrarToast('No se pudo cambiar la fecha: ' + err.message, 'error')
       }
       return
