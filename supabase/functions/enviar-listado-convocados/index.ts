@@ -110,7 +110,14 @@ Deno.serve(async (req) => {
         ],
       })
     } finally {
-      await client.close()
+      // Si send() ya falló, un error acá taparía el mensaje real — se
+      // ignora a propósito, cerrar la conexión no es crítico si el envío
+      // en sí no funcionó.
+      try {
+        await client.close()
+      } catch {
+        // nada — ver comentario de arriba
+      }
     }
 
     return jsonResponse({ ok: true, enviados: destinatarios.length })
