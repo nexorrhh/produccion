@@ -79,6 +79,15 @@ export function OperativosPage() {
         await moverFecha(v)
         setFecha(v)
       } catch (err) {
+        // Conflicto = la fecha elegida ya tiene SU PROPIA citación real —
+        // seguramente el usuario quería ir a verla, no mover la actual ahí.
+        if (err.conflict) {
+          const abrir = confirm(
+            'Ya hay una citación guardada para esa fecha. ¿Querés abrirla (sin tocar la que tenés cargada ahora)?'
+          )
+          if (abrir) setFecha(v)
+          return
+        }
         mostrarToast('No se pudo cambiar la fecha: ' + err.message, 'error')
       }
       return

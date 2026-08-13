@@ -223,7 +223,14 @@ export function useCitacionDeFecha(fecha, empleados) {
       .eq('fecha', nuevaFecha)
       .neq('id', citacionId)
     if (existente && existente.length) {
-      throw new Error('Ya hay una citación guardada para esa fecha')
+      // Marcado como conflicto (no un error cualquiera) para que quien
+      // llama pueda ofrecer "abrir esa otra citación" en vez de solo
+      // mostrar un error sin salida — típicamente esto significa que el
+      // usuario en realidad quería navegar a una fecha que ya tiene su
+      // propia citación real, no mover la actual ahí.
+      const err = new Error('Ya hay una citación guardada para esa fecha')
+      err.conflict = true
+      throw err
     }
 
     const { error } = await supabase.from('citaciones').update({ fecha: nuevaFecha }).eq('id', citacionId)
