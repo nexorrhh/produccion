@@ -7,6 +7,7 @@ const VALIDACION_VACIA = {
   creadoPor: null,
   creadoPorNombre: null,
   validadoPor: null,
+  validadoPorNombre: null,
   validadoEn: null,
   rechazadoPor: null,
   rechazadoEn: null,
@@ -36,7 +37,7 @@ export function useCitacionDeFecha(fecha, empleados) {
         const { data: cits } = await supabase
           .from('citaciones')
           .select(
-            'id,estado,creado_por,creado_por_nombre,validado_por,validado_en,rechazado_por,rechazado_en,comentario_rechazo'
+            'id,estado,creado_por,creado_por_nombre,validado_por,validado_por_nombre,validado_en,rechazado_por,rechazado_en,comentario_rechazo'
           )
           .eq('fecha', fecha)
         if (cancelled) return
@@ -65,6 +66,7 @@ export function useCitacionDeFecha(fecha, empleados) {
             creadoPor: cit.creado_por,
             creadoPorNombre: cit.creado_por_nombre,
             validadoPor: cit.validado_por,
+            validadoPorNombre: cit.validado_por_nombre,
             validadoEn: cit.validado_en,
             rechazadoPor: cit.rechazado_por,
             rechazadoEn: cit.rechazado_en,
@@ -162,15 +164,26 @@ export function useCitacionDeFecha(fecha, empleados) {
     return { citacionId: citId, detalle }
   }
 
-  async function aprobar(usuarioId) {
+  async function aprobar(usuario) {
     if (!citacionId) throw new Error('No hay citación guardada para aprobar')
     const validadoEn = new Date().toISOString()
     const { error } = await supabase
       .from('citaciones')
-      .update({ estado: 'validada', validado_por: usuarioId, validado_en: validadoEn })
+      .update({
+        estado: 'validada',
+        validado_por: usuario.id,
+        validado_por_nombre: usuario.nombre_apellido,
+        validado_en: validadoEn,
+      })
       .eq('id', citacionId)
     if (error) throw error
-    setValidacion((prev) => ({ ...prev, estado: 'validada', validadoPor: usuarioId, validadoEn }))
+    setValidacion((prev) => ({
+      ...prev,
+      estado: 'validada',
+      validadoPor: usuario.id,
+      validadoPorNombre: usuario.nombre_apellido,
+      validadoEn,
+    }))
   }
 
   async function rechazar(usuarioId, comentario) {

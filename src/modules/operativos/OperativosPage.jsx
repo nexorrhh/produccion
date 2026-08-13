@@ -149,7 +149,7 @@ export function OperativosPage() {
         }
         throw new Error(detalle)
       }
-      await aprobar(user.id)
+      await aprobar(user)
       mostrarToast('Listado aprobado y enviado a ' + (data?.enviados ?? 0) + ' destinatario(s)', 'ok')
     } catch (err) {
       mostrarToast('No se pudo enviar el mail, la citación sigue pendiente: ' + err.message, 'error')
