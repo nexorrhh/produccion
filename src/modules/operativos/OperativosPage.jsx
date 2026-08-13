@@ -31,7 +31,6 @@ export function OperativosPage() {
   const { empleados, cumplimiento, mapaClasif, status, statusText } = useOperativosData()
 
   const [fecha, setFecha] = useState(proximoSabado)
-  const [tipo, setTipo] = useState(() => tipoSugerido(proximoSabado()))
   const [filtros, setFiltros] = useState({ search: '', empresa: '', puesto: '', tipopago: '' })
   const [vista, setVista] = useState('todos')
   const [guardando, setGuardando] = useState(false)
@@ -57,6 +56,7 @@ export function OperativosPage() {
   } = useCitacionDeFecha(fecha, empleados)
 
   const dia = diaDeFecha(fecha)
+  const tipo = tipoSugerido(fecha)
   const vistaAdmin = esVistaAdmin(user)
   // Los supervisores de planta solo tienen Citar — si por algún resto de
   // estado quedaran en otra pestaña, esto los vuelve a Citar sin drama.
@@ -67,37 +67,27 @@ export function OperativosPage() {
     setTimeout(() => setToast(null), 3000)
   }
 
-  // Cambiar la fecha acá significa "ir a ver/crear la citación de otro
-  // día" — no corrige la fecha de la que ya está cargada (para eso está
-  // handleCorregirFecha). Si hay algo marcado sin guardar, se pierde al
-  // cambiar de fecha, así que se avisa antes.
-  function handleFechaChange(v) {
+  // Un solo campo de fecha, sin botón aparte: si ya hay una citación
+  // guardada bajo la fecha actual (citacionId), cambiarla acá corrige ESA
+  // MISMA citación (moverFecha) en vez de crear una nueva y dejar la
+  // vieja huérfana. Si todavía no hay nada guardado, es simplemente
+  // navegar a ver/crear la citación de otra fecha — ahí sí se avisa antes
+  // de perder algo marcado sin guardar.
+  async function handleFechaChange(v) {
+    if (citacionId) {
+      try {
+        await moverFecha(v)
+        setFecha(v)
+      } catch (err) {
+        mostrarToast('No se pudo cambiar la fecha: ' + err.message, 'error')
+      }
+      return
+    }
     if (Object.keys(seleccion).length > 0) {
       const ok = confirm('Vas a cambiar de fecha y se va a perder lo que marcaste sin guardar. ¿Continuar?')
       if (!ok) return
     }
     setFecha(v)
-    setTipo(tipoSugerido(v))
-  }
-
-  // A diferencia de handleFechaChange, esto corrige la fecha de LA MISMA
-  // citación que está cargada (para cuando el supervisor cargó mal el día)
-  // — no crea una citación nueva ni pierde lo ya marcado/guardado.
-  async function handleCorregirFecha() {
-    const nueva = window.prompt('Nueva fecha del operativo (AAAA-MM-DD):', fecha)
-    if (!nueva) return
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(nueva)) {
-      mostrarToast('La fecha tiene que tener el formato AAAA-MM-DD', 'error')
-      return
-    }
-    try {
-      await moverFecha(nueva)
-      setFecha(nueva)
-      setTipo(tipoSugerido(nueva))
-      mostrarToast('Fecha corregida', 'ok')
-    } catch (err) {
-      mostrarToast('No se pudo corregir la fecha: ' + err.message, 'error')
-    }
   }
 
   const puestos = useMemo(
@@ -204,7 +194,6 @@ export function OperativosPage() {
 
   function handleAbrirValidacion(fechaElegida) {
     setFecha(fechaElegida)
-    setTipo(tipoSugerido(fechaElegida))
     setVistaPrincipal('citar')
   }
 
@@ -295,14 +284,7 @@ export function OperativosPage() {
             </div>
           )}
 
-          <SetupBar
-            fecha={fecha}
-            onFechaChange={handleFechaChange}
-            tipo={tipo}
-            onTipoChange={setTipo}
-            dia={dia}
-            counters={counters}
-          />
+          <SetupBar fecha={fecha} onFechaChange={handleFechaChange} tipo={tipo} dia={dia} counters={counters} />
 
           <Toolbar filtros={filtros} onFiltrosChange={setFiltros} puestos={puestos} vista={vista} onVistaChange={setVista} />
 
@@ -332,7 +314,6 @@ export function OperativosPage() {
             citacionId={citacionId}
             onAprobar={handleAprobar}
             onRechazar={handleRechazar}
-            onCorregirFecha={handleCorregirFecha}
           />
 
           {imprimiendoPlanilla && (

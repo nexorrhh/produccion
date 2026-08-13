@@ -12,7 +12,6 @@ export function ActionBar({
   citacionId,
   onAprobar,
   onRechazar,
-  onCorregirFecha,
 }) {
   const mostrarValidacion =
     puedeValidar && citacionId && (estadoValidacion === 'pendiente_validacion' || estadoValidacion === 'rechazada')
@@ -64,14 +63,6 @@ export function ActionBar({
       </button>
       {mostrarValidacion && (
         <>
-          <button className="btn" onClick={onCorregirFecha} disabled={guardando} title="Corrige la fecha de esta misma citación">
-            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-              <rect x="3" y="4" width="18" height="18" rx="2" />
-              <path d="M3 10h18M8 2v4M16 2v4" />
-              <path d="M9 16l2 2 4-4" />
-            </svg>
-            Corregir fecha
-          </button>
           <button className="btn btn-danger" onClick={onRechazar} disabled={guardando}>
             <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
               <circle cx="12" cy="12" r="10" />

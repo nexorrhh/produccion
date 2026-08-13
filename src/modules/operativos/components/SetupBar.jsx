@@ -8,15 +8,20 @@ export function diaDeFecha(fecha) {
   return DIAS[d.getDay()]
 }
 
+// Solo dos tipos: Sábado (si el día cae sábado) o Feriado (cualquier otro
+// día). No es un valor que el usuario elija — se deriva de la fecha, así
+// no puede quedar desalineado con el día real.
 export function tipoSugerido(fecha) {
   if (!fecha) return 'Feriado'
   const diaIdx = new Date(fecha + 'T00:00:00').getDay()
-  if (diaIdx === 6) return 'Sabado'
-  if (diaIdx === 0) return 'Domingo'
-  return 'Feriado'
+  return diaIdx === 6 ? 'Sabado' : 'Feriado'
 }
 
-export function SetupBar({ fecha, onFechaChange, tipo, onTipoChange, dia, counters }) {
+function tipoLabel(tipo) {
+  return tipo === 'Sabado' ? 'Sábado' : 'Feriado'
+}
+
+export function SetupBar({ fecha, onFechaChange, tipo, dia, counters }) {
   return (
     <div className="op-setup">
       <div className="op-setup-grid">
@@ -26,11 +31,7 @@ export function SetupBar({ fecha, onFechaChange, tipo, onTipoChange, dia, counte
         </div>
         <div className="op-field">
           <label>Tipo</label>
-          <select value={tipo} onChange={(e) => onTipoChange(e.target.value)}>
-            <option value="Sabado">Sábado</option>
-            <option value="Domingo">Domingo</option>
-            <option value="Feriado">Feriado</option>
-          </select>
+          <div className="op-day-label">{tipoLabel(tipo)}</div>
         </div>
         <div className="op-field">
           <label>Día</label>
