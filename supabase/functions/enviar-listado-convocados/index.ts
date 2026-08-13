@@ -78,12 +78,14 @@ Deno.serve(async (req) => {
 
     const client = new SMTPClient({
       connection: {
-        hostname: Deno.env.get('SMTP_HOST')!,
+        // .trim() por si el secreto quedó con un espacio de más al
+        // guardarlo (pasó con SMTP_HOST — "invalid char found in FQDN").
+        hostname: Deno.env.get('SMTP_HOST')!.trim(),
         port: Number(Deno.env.get('SMTP_PORT') || 465),
         tls: true,
         auth: {
-          username: Deno.env.get('SMTP_USER')!,
-          password: Deno.env.get('SMTP_PASS')!,
+          username: Deno.env.get('SMTP_USER')!.trim(),
+          password: Deno.env.get('SMTP_PASS')!.trim(),
         },
       },
     })
@@ -97,7 +99,7 @@ Deno.serve(async (req) => {
 
     try {
       await client.send({
-        from: Deno.env.get('SMTP_FROM')!,
+        from: Deno.env.get('SMTP_FROM')!.trim(),
         to: destinatarios.map((d: { email: string }) => d.email),
         subject: asunto,
         content: cuerpo,
