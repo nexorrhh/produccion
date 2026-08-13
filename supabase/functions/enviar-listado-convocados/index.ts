@@ -5,6 +5,12 @@
 // Se dispara desde OperativosPage.jsx (handleAprobar) recién cuando
 // Javier/Valentín aprueba la citación — no en cada guardado de Carlos.
 //
+// Usa denomailer (SMTP nativo de Deno) en vez de nodemailer: nodemailer vía
+// "npm:" depende del compatibilizador de Node para resolver DNS/abrir el
+// socket, y ese compatibilizador falla en el runtime de Supabase Edge
+// Functions ("queryA UNKNOWN <host>"). denomailer usa Deno.connect
+// directamente y no tiene ese problema.
+//
 // Deploy manual (no ejecutado por el asistente — requiere login/project-ref
 // propios de Supabase):
 //   supabase login
@@ -18,7 +24,7 @@
 //   supabase functions deploy enviar-listado-convocados
 
 import { createClient } from 'jsr:@supabase/supabase-js@2'
-import nodemailer from 'npm:nodemailer@6'
+import { SMTPClient } from 'https://deno.land/x/denomailer/mod.ts'
 
 const TIPO_LABEL: Record<string, string> = { Sabado: 'Sábado' }
 
@@ -70,13 +76,15 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'No hay destinatarios activos configurados en "Destinatarios del listado"' }, 422)
     }
 
-    const transporter = nodemailer.createTransport({
-      host: Deno.env.get('SMTP_HOST'),
-      port: Number(Deno.env.get('SMTP_PORT') || 465),
-      secure: true,
-      auth: {
-        user: Deno.env.get('SMTP_USER'),
-        pass: Deno.env.get('SMTP_PASS'),
+    const client = new SMTPClient({
+      connection: {
+        hostname: Deno.env.get('SMTP_HOST')!,
+        port: Number(Deno.env.get('SMTP_PORT') || 465),
+        tls: true,
+        auth: {
+          username: Deno.env.get('SMTP_USER')!,
+          password: Deno.env.get('SMTP_PASS')!,
+        },
       },
     })
 
@@ -87,19 +95,23 @@ Deno.serve(async (req) => {
       `Personas citadas: ${cantidad}\n\n` +
       `Se adjunta el listado en PDF.`
 
-    await transporter.sendMail({
-      from: Deno.env.get('SMTP_FROM'),
-      to: destinatarios.map((d: { email: string }) => d.email).join(', '),
-      subject: asunto,
-      text: cuerpo,
-      attachments: [
-        {
-          filename: `listado-convocados-${fecha}.pdf`,
-          content: pdfBase64,
-          encoding: 'base64',
-        },
-      ],
-    })
+    try {
+      await client.send({
+        from: Deno.env.get('SMTP_FROM')!,
+        to: destinatarios.map((d: { email: string }) => d.email),
+        subject: asunto,
+        content: cuerpo,
+        attachments: [
+          {
+            filename: `listado-convocados-${fecha}.pdf`,
+            content: pdfBase64,
+            encoding: 'base64',
+          },
+        ],
+      })
+    } finally {
+      await client.close()
+    }
 
     return jsonResponse({ ok: true, enviados: destinatarios.length })
   } catch (err) {
