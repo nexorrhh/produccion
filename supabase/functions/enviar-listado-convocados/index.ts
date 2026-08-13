@@ -28,10 +28,6 @@ import { SMTPClient } from 'https://deno.land/x/denomailer/mod.ts'
 
 const TIPO_LABEL: Record<string, string> = { Sabado: 'Sábado' }
 
-// El navegador manda un preflight OPTIONS antes del POST (supabase-js
-// agrega headers como "apikey"/"authorization", que no son "simples" para
-// CORS) — sin estos headers en TODAS las respuestas, el browser corta la
-// conexión antes de que la app vea siquiera el resultado real.
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -45,6 +41,67 @@ function jsonResponse(body: unknown, status = 200) {
   })
 }
 
+function fmtFechaLarga(fecha: string) {
+  return new Date(fecha + 'T00:00:00').toLocaleDateString('es-AR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+}
+
+function armarHtml({
+  tipoLabel,
+  diaSemana,
+  fechaLarga,
+  cantidad,
+  aprobadoPor,
+}: {
+  tipoLabel: string
+  diaSemana: string
+  fechaLarga: string
+  cantidad: number
+  aprobadoPor: string
+}) {
+  return `<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="utf-8" /></head>
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:'Segoe UI',Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:24px 0;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+          <tr>
+            <td style="background:#2563eb;padding:18px 24px;">
+              <span style="color:#ffffff;font-size:16px;font-weight:700;">🏭 Panel de Producción</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px;">
+              <p style="margin:0 0 12px;font-size:15px;color:#0f172a;">¡Hola, buen día! 👋</p>
+              <p style="margin:0 0 20px;font-size:14px;color:#334155;line-height:1.5;">
+                Se aprobó el plantel convocado para el <strong>${tipoLabel} ${fechaLarga}</strong>.
+                Se adjunta el listado completo en PDF.
+              </p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
+                <tr><td style="padding:14px 18px 6px;font-size:13.5px;color:#334155;">📅&nbsp; ${diaSemana} ${fechaLarga}</td></tr>
+                <tr><td style="padding:0 18px 6px;font-size:13.5px;color:#334155;">👥&nbsp; ${cantidad} persona${cantidad === 1 ? '' : 's'} citada${cantidad === 1 ? '' : 's'}</td></tr>
+                <tr><td style="padding:0 18px 14px;font-size:13.5px;color:#334155;">✅&nbsp; Aprobado por ${aprobadoPor}</td></tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:14px 24px;background:#f8fafc;border-top:1px solid #e2e8f0;">
+              <span style="font-size:11.5px;color:#94a3b8;">Cimomet S.A. &amp; Co.mo.ing S.R.L.</span>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -55,7 +112,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { fecha, tipo, diaSemana, cantidad, pdfBase64 } = await req.json()
+    const { fecha, tipo, diaSemana, cantidad, pdfBase64, aprobadoPor } = await req.json()
 
     if (!fecha || !pdfBase64 || !cantidad) {
       return jsonResponse({ error: 'Faltan datos del listado (fecha/cantidad/pdfBase64)' }, 400)
@@ -78,8 +135,6 @@ Deno.serve(async (req) => {
 
     const client = new SMTPClient({
       connection: {
-        // .trim() por si el secreto quedó con un espacio de más al
-        // guardarlo (pasó con SMTP_HOST — "invalid char found in FQDN").
         hostname: Deno.env.get('SMTP_HOST')!.trim(),
         port: Number(Deno.env.get('SMTP_PORT') || 465),
         tls: true,
@@ -91,18 +146,23 @@ Deno.serve(async (req) => {
     })
 
     const tipoLabel = TIPO_LABEL[tipo] || tipo
-    const asunto = `Listado de convocados — ${tipoLabel} ${fecha}`
-    const cuerpo =
-      `Se aprobó el listado de convocados para el ${diaSemana} ${fecha} (${tipoLabel}).\n\n` +
-      `Personas citadas: ${cantidad}\n\n` +
-      `Se adjunta el listado en PDF.`
+    const fechaLarga = fmtFechaLarga(fecha)
+    const asunto = `Listado de convocados — ${tipoLabel} ${fechaLarga}`
+    const html = armarHtml({
+      tipoLabel,
+      diaSemana,
+      fechaLarga,
+      cantidad,
+      aprobadoPor: aprobadoPor || '—',
+    })
 
     try {
       await client.send({
         from: Deno.env.get('SMTP_FROM')!.trim(),
         to: destinatarios.map((d: { email: string }) => d.email),
         subject: asunto,
-        content: cuerpo,
+        content: 'auto',
+        html,
         attachments: [
           {
             filename: `listado-convocados-${fecha}.pdf`,
@@ -112,13 +172,10 @@ Deno.serve(async (req) => {
         ],
       })
     } finally {
-      // Si send() ya falló, un error acá taparía el mensaje real — se
-      // ignora a propósito, cerrar la conexión no es crítico si el envío
-      // en sí no funcionó.
       try {
         await client.close()
       } catch {
-        // nada — ver comentario de arriba
+        // ignorar — si send() ya falló, un error acá taparía el mensaje real
       }
     }
 

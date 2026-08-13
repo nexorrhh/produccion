@@ -153,7 +153,14 @@ export function OperativosPage() {
       })
       const pdfBase64 = generarPdfListadoConvocados({ fecha, dia, tipo, detalle, mapaClasif })
       const { data, error } = await supabase.functions.invoke('enviar-listado-convocados', {
-        body: { fecha, tipo, diaSemana: dia, cantidad: detalle.length, pdfBase64 },
+        body: {
+          fecha,
+          tipo,
+          diaSemana: dia,
+          cantidad: detalle.length,
+          pdfBase64,
+          aprobadoPor: user.nombre_apellido,
+        },
       })
       if (error) {
         // supabase-js solo da un mensaje genérico ("Edge Function returned
