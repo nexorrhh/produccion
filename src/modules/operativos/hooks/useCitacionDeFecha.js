@@ -208,6 +208,28 @@ export function useCitacionDeFecha(fecha, empleados) {
     }))
   }
 
+  // Corrige la fecha de LA MISMA citación cargada (update), en vez de que
+  // el picker de fecha la trate como "otra citación" y termine creando un
+  // operativo duplicado mientras el original queda huérfano en
+  // Validación. Después de llamar a esto hay que actualizar el estado
+  // `fecha` del componente padre para que vuelva a cargar — como el valor
+  // en la base ya cambió, va a encontrar esta misma citación, no crear otra.
+  async function moverFecha(nuevaFecha) {
+    if (!citacionId) throw new Error('No hay citación guardada para corregir')
+
+    const { data: existente } = await supabase
+      .from('citaciones')
+      .select('id')
+      .eq('fecha', nuevaFecha)
+      .neq('id', citacionId)
+    if (existente && existente.length) {
+      throw new Error('Ya hay una citación guardada para esa fecha')
+    }
+
+    const { error } = await supabase.from('citaciones').update({ fecha: nuevaFecha }).eq('id', citacionId)
+    if (error) throw error
+  }
+
   async function copiarUltima(fechaActual) {
     const { data: cits } = await supabase
       .from('citaciones')
@@ -269,6 +291,7 @@ export function useCitacionDeFecha(fecha, empleados) {
     guardar,
     aprobar,
     rechazar,
+    moverFecha,
     copiarUltima,
     limpiar,
     toggleCitar,

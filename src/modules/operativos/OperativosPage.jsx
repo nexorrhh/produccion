@@ -48,6 +48,7 @@ export function OperativosPage() {
     guardar,
     aprobar,
     rechazar,
+    moverFecha,
     copiarUltima,
     limpiar,
     toggleCitar,
@@ -66,9 +67,37 @@ export function OperativosPage() {
     setTimeout(() => setToast(null), 3000)
   }
 
+  // Cambiar la fecha acá significa "ir a ver/crear la citación de otro
+  // día" — no corrige la fecha de la que ya está cargada (para eso está
+  // handleCorregirFecha). Si hay algo marcado sin guardar, se pierde al
+  // cambiar de fecha, así que se avisa antes.
   function handleFechaChange(v) {
+    if (Object.keys(seleccion).length > 0) {
+      const ok = confirm('Vas a cambiar de fecha y se va a perder lo que marcaste sin guardar. ¿Continuar?')
+      if (!ok) return
+    }
     setFecha(v)
     setTipo(tipoSugerido(v))
+  }
+
+  // A diferencia de handleFechaChange, esto corrige la fecha de LA MISMA
+  // citación que está cargada (para cuando el supervisor cargó mal el día)
+  // — no crea una citación nueva ni pierde lo ya marcado/guardado.
+  async function handleCorregirFecha() {
+    const nueva = window.prompt('Nueva fecha del operativo (AAAA-MM-DD):', fecha)
+    if (!nueva) return
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(nueva)) {
+      mostrarToast('La fecha tiene que tener el formato AAAA-MM-DD', 'error')
+      return
+    }
+    try {
+      await moverFecha(nueva)
+      setFecha(nueva)
+      setTipo(tipoSugerido(nueva))
+      mostrarToast('Fecha corregida', 'ok')
+    } catch (err) {
+      mostrarToast('No se pudo corregir la fecha: ' + err.message, 'error')
+    }
   }
 
   const puestos = useMemo(
@@ -303,6 +332,7 @@ export function OperativosPage() {
             citacionId={citacionId}
             onAprobar={handleAprobar}
             onRechazar={handleRechazar}
+            onCorregirFecha={handleCorregirFecha}
           />
 
           {imprimiendoPlanilla && (
