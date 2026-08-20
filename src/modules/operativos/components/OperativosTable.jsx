@@ -249,11 +249,10 @@ function FilaEmpleado({ empleado: e, sel, cumplimiento: cmp, onToggleCitar, onSe
 }
 
 // Vista de tarjetas — tablet/celular. Mismos datos y acciones que
-// FilaEmpleado, pero apiladas y con botones/checkboxes grandes para
-// tocar con el dedo. El detalle (turno/OT/trabajo/cumplimiento) solo se
-// expande para quien ya está citado, así se ve todo sin achicar nada: la
-// lista completa entra escaneable, y lo que hay que completar aparece
-// grande apenas se tilda a alguien.
+// FilaEmpleado (misma info siempre visible: turno, Nº OT, trabajo,
+// cumplimiento — deshabilitados hasta tildar a la persona, igual que en
+// la tabla de escritorio), pero apiladas y con botones/checkboxes
+// grandes para tocar con el dedo en vez de columnas angostas.
 function GrupoTarjetas({ grupo, cumplimiento, seleccion, onToggleCitar, onSetTurno, onSetCampo }) {
   const citados = grupo.items.filter((e) => seleccion[key(e)]).length
   return (
@@ -319,46 +318,48 @@ function TarjetaEmpleado({ empleado: e, sel, cumplimiento: cmp, onToggleCitar, o
         </div>
       </label>
 
-      {cited && (
-        <div className="op-card-detalle">
-          <div className="op-card-turnos">
-            <label className={'op-card-turno' + (sel.manana ? ' on' : '')}>
-              <input
-                type="checkbox"
-                checked={!!sel.manana}
-                onChange={(ev) => onSetTurno(k, 'manana', ev.target.checked)}
-              />
-              07-12
-            </label>
-            <label className={'op-card-turno' + (sel.tarde ? ' on' : '')}>
-              <input
-                type="checkbox"
-                checked={!!sel.tarde}
-                onChange={(ev) => onSetTurno(k, 'tarde', ev.target.checked)}
-              />
-              12-16
-            </label>
-          </div>
-          <div className="op-card-campos">
+      <div className="op-card-detalle">
+        <div className="op-card-turnos">
+          <label className={'op-card-turno' + (sel && sel.manana ? ' on' : '') + (cited ? '' : ' disabled')}>
             <input
-              type="text"
-              className="op-inp-cell op-inp-ot"
-              defaultValue={sel.ot || ''}
-              key={k + '-ot-card-' + cited}
-              placeholder="Nº OT"
-              onBlur={(ev) => onSetCampo(k, 'ot', ev.target.value)}
+              type="checkbox"
+              checked={!!(sel && sel.manana)}
+              disabled={!cited}
+              onChange={(ev) => onSetTurno(k, 'manana', ev.target.checked)}
             />
+            07-12
+          </label>
+          <label className={'op-card-turno' + (sel && sel.tarde ? ' on' : '') + (cited ? '' : ' disabled')}>
             <input
-              type="text"
-              className="op-inp-cell"
-              defaultValue={sel.trabajo || ''}
-              key={k + '-trabajo-card-' + cited}
-              placeholder="Trabajo"
-              onBlur={(ev) => onSetCampo(k, 'trabajo', ev.target.value)}
+              type="checkbox"
+              checked={!!(sel && sel.tarde)}
+              disabled={!cited}
+              onChange={(ev) => onSetTurno(k, 'tarde', ev.target.checked)}
             />
-          </div>
+            12-16
+          </label>
         </div>
-      )}
+        <div className="op-card-campos">
+          <input
+            type="text"
+            className="op-inp-cell op-inp-ot"
+            defaultValue={sel ? sel.ot : ''}
+            key={k + '-ot-card-' + cited}
+            disabled={!cited}
+            placeholder="Nº OT"
+            onBlur={(ev) => onSetCampo(k, 'ot', ev.target.value)}
+          />
+          <input
+            type="text"
+            className="op-inp-cell"
+            defaultValue={sel ? sel.trabajo || '' : ''}
+            key={k + '-trabajo-card-' + cited}
+            disabled={!cited}
+            placeholder="Trabajo"
+            onBlur={(ev) => onSetCampo(k, 'trabajo', ev.target.value)}
+          />
+        </div>
+      </div>
 
       <div className="op-card-cumplimiento">{cmpNode}</div>
     </div>

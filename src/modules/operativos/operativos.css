@@ -348,6 +348,9 @@
   border-color: var(--com);
   color: var(--com);
 }
+.op-card-turno.disabled {
+  opacity: 0.5;
+}
 .op-card-campos {
   display: flex;
   flex-direction: column;
