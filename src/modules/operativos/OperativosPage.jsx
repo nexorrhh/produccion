@@ -4,7 +4,6 @@ import { Toolbar } from './components/Toolbar'
 import { OperativosTable } from './components/OperativosTable'
 import { ActionBar } from './components/ActionBar'
 import { NotificacionesModal } from './components/NotificacionesModal'
-import { PlanillaImprimible } from './components/PlanillaImprimible'
 import { Toast } from '../../app/components/Toast'
 import { AnalisisOperativos } from './analisis/AnalisisOperativos'
 import { ValidacionOperativos } from './validacion/ValidacionOperativos'
@@ -12,7 +11,6 @@ import { useOperativosData } from './hooks/useOperativosData'
 import { useCitacionDeFecha } from './hooks/useCitacionDeFecha'
 import { useAuth } from '../../app/auth/useAuth'
 import { key, tipoPago } from './lib/clasificacion'
-import { exportarCSV } from './lib/csvExport'
 import { generarPdfListadoConvocados } from './lib/pdfListadoConvocados'
 import { puedeValidar, esVistaAdmin } from './lib/permisos'
 import { supabase } from '../../app/supabaseClient'
@@ -37,7 +35,6 @@ export function OperativosPage() {
   const [toast, setToast] = useState(null)
   const [vistaPrincipal, setVistaPrincipal] = useState('citar')
   const [mostrarNotificaciones, setMostrarNotificaciones] = useState(false)
-  const [imprimiendoPlanilla, setImprimiendoPlanilla] = useState(false)
 
   const {
     seleccion,
@@ -234,15 +231,6 @@ export function OperativosPage() {
     }
   }
 
-  function handleExportarCSV() {
-    try {
-      exportarCSV(seleccion, empleados, mapaClasif, fecha, dia)
-      mostrarToast('CSV descargado', 'ok')
-    } catch (err) {
-      mostrarToast(err.message, 'error')
-    }
-  }
-
   return (
     <div className="wrap">
       {vistaAdmin && (
@@ -316,8 +304,6 @@ export function OperativosPage() {
             citadosCount={Object.keys(seleccion).length}
             onLimpiar={handleLimpiar}
             onCopiarUltima={handleCopiarUltima}
-            onExportarCSV={handleExportarCSV}
-            onImprimirPlanilla={() => setImprimiendoPlanilla(true)}
             onGuardar={handleGuardar}
             guardando={guardando}
             puedeValidar={puedeValidar(user)}
@@ -326,14 +312,6 @@ export function OperativosPage() {
             onAprobar={handleAprobar}
             onRechazar={handleRechazar}
           />
-
-          {imprimiendoPlanilla && (
-            <PlanillaImprimible
-              empleados={empleados}
-              mapaClasif={mapaClasif}
-              onListo={() => setImprimiendoPlanilla(false)}
-            />
-          )}
 
           <Toast toast={toast} />
         </>
