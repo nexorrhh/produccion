@@ -515,20 +515,11 @@
   margin-left: auto;
 }
 
-@media (max-width: 900px) {
-  .op-action-bar {
-    left: 72px;
-    padding: 10px 14px;
-    flex-wrap: wrap;
-  }
-  .op-counters {
-    margin-left: 0;
-    width: 100%;
-  }
-
-  /* Tablet parada (ej. iPad ~768-834px) y celular: tarjetas en vez de
-     tabla — así entran los nombres completos y los controles grandes sin
-     scroll horizontal ni letra chica. */
+/* Tablet (portrait y landscape comunes, ej. iPad 768-1194px) y celular:
+   tarjetas en vez de tabla de 10 columnas — a un ancho intermedio (900-
+   1100px) la tabla entraba "a medias" con scroll horizontal y cortaba las
+   últimas columnas, por eso el umbral es 1100px y no 900px. */
+@media (max-width: 1100px) {
   .op-tabla-desktop {
     display: none;
   }
@@ -584,6 +575,7 @@
   }
   .op-action-bar {
     gap: 10px;
+    flex-wrap: wrap;
   }
   .op-action-bar .btn {
     padding: 14px 20px;
@@ -597,37 +589,17 @@
   }
 }
 
-/* Uso táctil (tablet, ej. iPad ~1024px) — Carlos carga la citación desde
-   ahí. La tabla ya scrollea sola (overflow-x en .op-table-container), esto
-   agranda los controles para que sean cómodos con el dedo. */
-@media (max-width: 1100px) {
-  .op-chk {
-    width: 26px;
-    height: 26px;
+/* El sidebar recién colapsa a 72px a partir de acá (layout.css) — la
+   barra de acciones fija tiene que acomodarse a ese mismo ancho, por eso
+   este ajuste va en un breakpoint aparte y más angosto que el de arriba. */
+@media (max-width: 900px) {
+  .op-action-bar {
+    left: 72px;
+    padding: 10px 14px;
   }
-  .op-inp-cell {
-    padding: 10px 10px;
-    font-size: 14.5px;
-  }
-  .op-table-container thead th,
-  .op-table-container tbody td {
-    padding: 13px 14px;
-  }
-  .op-search-wrap input,
-  .op-filter {
-    padding: 12px 14px;
-    font-size: 15px;
-  }
-  .op-search-wrap input {
-    padding-left: 40px;
-  }
-  .op-chip-toggle button {
-    padding: 12px 16px;
-    font-size: 14px;
-  }
-  .op-action-bar .btn {
-    padding: 12px 18px;
-    font-size: 14px;
+  .op-counters {
+    margin-left: 0;
+    width: 100%;
   }
 }
 
