@@ -353,12 +353,17 @@
 }
 .op-card-campos {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 10px;
 }
 .op-card-campos .op-inp-cell {
   padding: 13px 14px;
   font-size: 16px;
+  flex: 1;
+}
+.op-card-campos .op-inp-ot {
+  flex: 0 0 110px;
+  max-width: 110px;
 }
 .op-card-cumplimiento {
   margin-top: 14px;
