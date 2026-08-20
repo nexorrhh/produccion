@@ -248,6 +248,123 @@
   background: #e7f1ff;
 }
 
+/* TARJETAS — vista tablet/celular (reemplaza la tabla debajo de 900px,
+   ver @media más abajo). Objetivo: nombres bien legibles y checkboxes/
+   inputs grandes para tocar con el dedo, sin scroll horizontal. El
+   detalle (turno/OT/trabajo) solo se muestra para quien ya está citado,
+   así la lista se puede escanear rápido y lo que hay que completar
+   aparece grande apenas se tilda a alguien. */
+.op-cards {
+  display: none;
+}
+.op-cards-vacio {
+  display: none;
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--text3);
+}
+.op-card-grupo {
+  margin-bottom: 6px;
+}
+.op-card-grupo .op-group-head {
+  margin: 16px 6px 10px;
+}
+.op-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin: 0 4px 12px;
+}
+.op-card.cited {
+  border-color: var(--com);
+  box-shadow: 0 0 0 1.5px var(--com);
+  background: #f7faff;
+}
+.op-card-cabecera {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  cursor: pointer;
+}
+.op-chk-lg {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.op-card-identidad {
+  flex: 1;
+  min-width: 0;
+}
+.op-card-nombre {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+.op-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.op-card-meta .op-legajo-num,
+.op-card-meta .badge {
+  font-size: 13px;
+  padding: 4px 10px;
+}
+.op-card-detalle {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.op-card-turnos {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.op-card-turno {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px;
+  border: 1.5px solid var(--border2);
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text2);
+}
+.op-card-turno input {
+  width: 24px;
+  height: 24px;
+  accent-color: var(--com);
+}
+.op-card-turno.on {
+  background: var(--com-bg);
+  border-color: var(--com);
+  color: var(--com);
+}
+.op-card-campos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.op-card-campos .op-inp-cell {
+  padding: 13px 14px;
+  font-size: 16px;
+}
+.op-card-cumplimiento {
+  margin-top: 14px;
+}
+.op-card-cmp-sin {
+  font-size: 13px;
+  color: var(--text3);
+}
+
 .op-badge-puesto {
   background: var(--bg-soft);
   color: #475569;
@@ -407,6 +524,76 @@
   .op-counters {
     margin-left: 0;
     width: 100%;
+  }
+
+  /* Tablet parada (ej. iPad ~768-834px) y celular: tarjetas en vez de
+     tabla — así entran los nombres completos y los controles grandes sin
+     scroll horizontal ni letra chica. */
+  .op-tabla-desktop {
+    display: none;
+  }
+  .op-cards {
+    display: block;
+  }
+  .op-table-container {
+    overflow-x: visible;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+  }
+  .op-cards-vacio {
+    display: block;
+  }
+
+  /* Setup (fecha/tipo/día/contadores) más grande y apilado */
+  .op-setup {
+    padding: 16px;
+  }
+  .op-setup-grid {
+    gap: 14px;
+  }
+  .op-field input,
+  .op-field select,
+  .op-day-label {
+    font-size: 16px;
+    padding: 12px 14px;
+  }
+  .op-counters {
+    gap: 10px;
+  }
+  .op-counter {
+    flex: 1 1 30%;
+    padding: 12px 10px;
+  }
+  .op-counter-val {
+    font-size: 24px;
+  }
+
+  /* Toolbar y ActionBar: controles grandes para tocar */
+  .op-search-wrap input,
+  .op-filter {
+    padding: 14px 16px;
+    font-size: 16px;
+  }
+  .op-search-wrap input {
+    padding-left: 42px;
+  }
+  .op-chip-toggle button {
+    padding: 14px 18px;
+    font-size: 15px;
+  }
+  .op-action-bar {
+    gap: 10px;
+  }
+  .op-action-bar .btn {
+    padding: 14px 20px;
+    font-size: 15px;
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+  .op-action-info {
+    width: 100%;
+    font-size: 14px;
   }
 }
 

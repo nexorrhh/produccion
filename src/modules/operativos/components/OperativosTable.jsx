@@ -35,7 +35,7 @@ export function OperativosTable({
   if (!lista.length) {
     return (
       <div className="op-table-container">
-        <table>
+        <table className="op-tabla-desktop">
           <thead>
             <HeaderRow campo={campo} direccion={direccion} onOrdenar={alternar} />
           </thead>
@@ -45,6 +45,7 @@ export function OperativosTable({
             </tr>
           </tbody>
         </table>
+        <div className="op-cards-vacio">Sin resultados</div>
       </div>
     )
   }
@@ -63,7 +64,11 @@ export function OperativosTable({
 
   return (
     <div className="op-table-container">
-      <table>
+      {/* Tabla: pantallas anchas (desktop). Tarjetas: tablet/celular — ver
+          op-tabla-desktop / op-cards en operativos.css (@media). Se
+          renderizan las dos, CSS decide cuál se ve, así no hace falta
+          detectar el ancho por JS. */}
+      <table className="op-tabla-desktop">
         <thead>
           <HeaderRow campo={campo} direccion={direccion} onOrdenar={alternar} />
         </thead>
@@ -81,6 +86,20 @@ export function OperativosTable({
           ))}
         </tbody>
       </table>
+
+      <div className="op-cards">
+        {grupos.map((g) => (
+          <GrupoTarjetas
+            key={g.tipo}
+            grupo={g}
+            cumplimiento={cumplimiento}
+            seleccion={seleccion}
+            onToggleCitar={onToggleCitar}
+            onSetTurno={onSetTurno}
+            onSetCampo={onSetCampo}
+          />
+        ))}
+      </div>
     </div>
   )
 }
@@ -226,5 +245,122 @@ function FilaEmpleado({ empleado: e, sel, cumplimiento: cmp, onToggleCitar, onSe
       </td>
       <td>{cmpNode}</td>
     </tr>
+  )
+}
+
+// Vista de tarjetas — tablet/celular. Mismos datos y acciones que
+// FilaEmpleado, pero apiladas y con botones/checkboxes grandes para
+// tocar con el dedo. El detalle (turno/OT/trabajo/cumplimiento) solo se
+// expande para quien ya está citado, así se ve todo sin achicar nada: la
+// lista completa entra escaneable, y lo que hay que completar aparece
+// grande apenas se tilda a alguien.
+function GrupoTarjetas({ grupo, cumplimiento, seleccion, onToggleCitar, onSetTurno, onSetCampo }) {
+  const citados = grupo.items.filter((e) => seleccion[key(e)]).length
+  return (
+    <div className="op-card-grupo">
+      <div className={'op-group-head ' + grupo.clase}>
+        {grupo.titulo}
+        <span className="g-count">{grupo.items.length}</span>
+        {citados > 0 && (
+          <span className="g-cited">
+            {citados} citado{citados > 1 ? 's' : ''}
+          </span>
+        )}
+      </div>
+      {grupo.items.map((e) => (
+        <TarjetaEmpleado
+          key={key(e)}
+          empleado={e}
+          sel={seleccion[key(e)]}
+          cumplimiento={cumplimiento[key(e)]}
+          onToggleCitar={onToggleCitar}
+          onSetTurno={onSetTurno}
+          onSetCampo={onSetCampo}
+        />
+      ))}
+    </div>
+  )
+}
+
+function TarjetaEmpleado({ empleado: e, sel, cumplimiento: cmp, onToggleCitar, onSetTurno, onSetCampo }) {
+  const k = key(e)
+  const cited = !!sel
+
+  let cmpNode = <span className="op-card-cmp-sin">Sin historial</span>
+  if (cmp && cmp.convocado > 0) {
+    cmpNode = (
+      <CumplimientoBarra
+        pct={Math.round(cmp.pct_cumplimiento)}
+        presentes={cmp.presente}
+        ausentes={cmp.ausente || 0}
+        noConvocados={cmp.no_convocado || 0}
+        totalLabel="Total operativos"
+        total={cmp.convocado}
+        tituloContexto={e.apellido_y_nombre}
+      />
+    )
+  }
+
+  return (
+    <div className={'op-card' + (cited ? ' cited' : '')}>
+      <label className="op-card-cabecera">
+        <input type="checkbox" className="op-chk op-chk-lg" checked={cited} onChange={() => onToggleCitar(k)} />
+        <div className="op-card-identidad">
+          <div className="op-card-nombre">{e.apellido_y_nombre}</div>
+          <div className="op-card-meta">
+            <span className="op-legajo-num">{e.legajo}</span>
+            {e.empresa === 'CIMOMET' ? (
+              <span className="badge badge-cim">Cimomet</span>
+            ) : (
+              <span className="badge badge-com">Co.mo.ing</span>
+            )}
+            <span className="badge op-badge-puesto">{e.desc_puesto || '—'}</span>
+          </div>
+        </div>
+      </label>
+
+      {cited && (
+        <div className="op-card-detalle">
+          <div className="op-card-turnos">
+            <label className={'op-card-turno' + (sel.manana ? ' on' : '')}>
+              <input
+                type="checkbox"
+                checked={!!sel.manana}
+                onChange={(ev) => onSetTurno(k, 'manana', ev.target.checked)}
+              />
+              07-12
+            </label>
+            <label className={'op-card-turno' + (sel.tarde ? ' on' : '')}>
+              <input
+                type="checkbox"
+                checked={!!sel.tarde}
+                onChange={(ev) => onSetTurno(k, 'tarde', ev.target.checked)}
+              />
+              12-16
+            </label>
+          </div>
+          <div className="op-card-campos">
+            <input
+              type="text"
+              className="op-inp-cell op-inp-ot"
+              defaultValue={sel.ot || ''}
+              key={k + '-ot-card-' + cited}
+              placeholder="Nº OT"
+              onBlur={(ev) => onSetCampo(k, 'ot', ev.target.value)}
+            />
+            <input
+              type="text"
+              className="op-inp-cell"
+              defaultValue={sel.trabajo || ''}
+              key={k + '-trabajo-card-' + cited}
+              placeholder="Trabajo"
+              onBlur={(ev) => onSetCampo(k, 'trabajo', ev.target.value)}
+            />
+          </div>
+        </div>
+      )}
+
+      <div className="op-card-cumplimiento">{cmpNode}</div>
+    </div>
   )
 }
