@@ -717,6 +717,8 @@
 .op-tabs-spacer {
   margin-left: auto;
   align-self: center;
+  display: flex;
+  gap: 8px;
 }
 
 /* Modal de configuración de destinatarios del mail (Operativos) */

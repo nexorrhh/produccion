@@ -16,6 +16,7 @@ export function OperativosTable({
   seleccion,
   filtros,
   vista,
+  otsDisponibles,
   onToggleCitar,
   onSetTurno,
   onSetCampo,
@@ -79,6 +80,7 @@ export function OperativosTable({
               grupo={g}
               cumplimiento={cumplimiento}
               seleccion={seleccion}
+              otsDisponibles={otsDisponibles}
               onToggleCitar={onToggleCitar}
               onSetTurno={onSetTurno}
               onSetCampo={onSetCampo}
@@ -94,6 +96,7 @@ export function OperativosTable({
             grupo={g}
             cumplimiento={cumplimiento}
             seleccion={seleccion}
+            otsDisponibles={otsDisponibles}
             onToggleCitar={onToggleCitar}
             onSetTurno={onSetTurno}
             onSetCampo={onSetCampo}
@@ -133,7 +136,7 @@ function HeaderRow({ campo, direccion, onOrdenar }) {
   )
 }
 
-function GroupRows({ grupo, cumplimiento, seleccion, onToggleCitar, onSetTurno, onSetCampo }) {
+function GroupRows({ grupo, cumplimiento, seleccion, otsDisponibles, onToggleCitar, onSetTurno, onSetCampo }) {
   const citados = grupo.items.filter((e) => seleccion[key(e)]).length
   return (
     <>
@@ -156,6 +159,7 @@ function GroupRows({ grupo, cumplimiento, seleccion, onToggleCitar, onSetTurno, 
           empleado={e}
           sel={seleccion[key(e)]}
           cumplimiento={cumplimiento[key(e)]}
+          otsDisponibles={otsDisponibles}
           onToggleCitar={onToggleCitar}
           onSetTurno={onSetTurno}
           onSetCampo={onSetCampo}
@@ -165,7 +169,7 @@ function GroupRows({ grupo, cumplimiento, seleccion, onToggleCitar, onSetTurno, 
   )
 }
 
-function FilaEmpleado({ empleado: e, sel, cumplimiento: cmp, onToggleCitar, onSetTurno, onSetCampo }) {
+function FilaEmpleado({ empleado: e, sel, cumplimiento: cmp, otsDisponibles, onToggleCitar, onSetTurno, onSetCampo }) {
   const k = key(e)
   const cited = !!sel
 
@@ -222,15 +226,19 @@ function FilaEmpleado({ empleado: e, sel, cumplimiento: cmp, onToggleCitar, onSe
         />
       </td>
       <td>
-        <input
-          type="text"
+        <select
           className="op-inp-cell op-inp-ot"
-          defaultValue={sel ? sel.ot : ''}
-          key={k + '-ot-' + cited}
+          value={sel ? sel.ot || '' : ''}
           disabled={!cited}
-          placeholder="OT"
-          onBlur={(ev) => onSetCampo(k, 'ot', ev.target.value)}
-        />
+          onChange={(ev) => onSetCampo(k, 'ot', ev.target.value)}
+        >
+          <option value="">OT</option>
+          {(otsDisponibles || []).map((o) => (
+            <option key={o.id} value={o.numero + ' - ' + o.cliente}>
+              {o.numero} - {o.cliente}
+            </option>
+          ))}
+        </select>
       </td>
       <td>
         <input
@@ -253,7 +261,7 @@ function FilaEmpleado({ empleado: e, sel, cumplimiento: cmp, onToggleCitar, onSe
 // cumplimiento — deshabilitados hasta tildar a la persona, igual que en
 // la tabla de escritorio), pero apiladas y con botones/checkboxes
 // grandes para tocar con el dedo en vez de columnas angostas.
-function GrupoTarjetas({ grupo, cumplimiento, seleccion, onToggleCitar, onSetTurno, onSetCampo }) {
+function GrupoTarjetas({ grupo, cumplimiento, seleccion, otsDisponibles, onToggleCitar, onSetTurno, onSetCampo }) {
   const citados = grupo.items.filter((e) => seleccion[key(e)]).length
   return (
     <div className="op-card-grupo">
@@ -272,6 +280,7 @@ function GrupoTarjetas({ grupo, cumplimiento, seleccion, onToggleCitar, onSetTur
           empleado={e}
           sel={seleccion[key(e)]}
           cumplimiento={cumplimiento[key(e)]}
+          otsDisponibles={otsDisponibles}
           onToggleCitar={onToggleCitar}
           onSetTurno={onSetTurno}
           onSetCampo={onSetCampo}
@@ -281,7 +290,7 @@ function GrupoTarjetas({ grupo, cumplimiento, seleccion, onToggleCitar, onSetTur
   )
 }
 
-function TarjetaEmpleado({ empleado: e, sel, cumplimiento: cmp, onToggleCitar, onSetTurno, onSetCampo }) {
+function TarjetaEmpleado({ empleado: e, sel, cumplimiento: cmp, otsDisponibles, onToggleCitar, onSetTurno, onSetCampo }) {
   const k = key(e)
   const cited = !!sel
 
@@ -340,15 +349,19 @@ function TarjetaEmpleado({ empleado: e, sel, cumplimiento: cmp, onToggleCitar, o
           </label>
         </div>
         <div className="op-card-campos">
-          <input
-            type="text"
+          <select
             className="op-inp-cell op-inp-ot"
-            defaultValue={sel ? sel.ot : ''}
-            key={k + '-ot-card-' + cited}
+            value={sel ? sel.ot || '' : ''}
             disabled={!cited}
-            placeholder="Nº OT"
-            onBlur={(ev) => onSetCampo(k, 'ot', ev.target.value)}
-          />
+            onChange={(ev) => onSetCampo(k, 'ot', ev.target.value)}
+          >
+            <option value="">Nº OT</option>
+            {(otsDisponibles || []).map((o) => (
+              <option key={o.id} value={o.numero + ' - ' + o.cliente}>
+                {o.numero} - {o.cliente}
+              </option>
+            ))}
+          </select>
           <input
             type="text"
             className="op-inp-cell"

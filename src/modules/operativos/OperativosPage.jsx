@@ -4,11 +4,13 @@ import { Toolbar } from './components/Toolbar'
 import { OperativosTable } from './components/OperativosTable'
 import { ActionBar } from './components/ActionBar'
 import { NotificacionesModal } from './components/NotificacionesModal'
+import { OtModal } from './components/OtModal'
 import { Toast } from '../../app/components/Toast'
 import { AnalisisOperativos } from './analisis/AnalisisOperativos'
 import { ValidacionOperativos } from './validacion/ValidacionOperativos'
 import { useOperativosData } from './hooks/useOperativosData'
 import { useCitacionDeFecha } from './hooks/useCitacionDeFecha'
+import { useOt } from './hooks/useOt'
 import { useAuth } from '../../app/auth/useAuth'
 import { key, tipoPago } from './lib/clasificacion'
 import { generarPdfListadoConvocados } from './lib/pdfListadoConvocados'
@@ -35,6 +37,9 @@ export function OperativosPage() {
   const [toast, setToast] = useState(null)
   const [vistaPrincipal, setVistaPrincipal] = useState('citar')
   const [mostrarNotificaciones, setMostrarNotificaciones] = useState(false)
+  const [mostrarOt, setMostrarOt] = useState(false)
+  const { ots } = useOt()
+  const otsActivas = useMemo(() => ots.filter((o) => o.activo), [ots])
 
   const {
     seleccion,
@@ -245,6 +250,9 @@ export function OperativosPage() {
             Validación
           </button>
           <div className="op-tabs-spacer">
+            <button className="btn btn-ghost" onClick={() => setMostrarOt(true)}>
+              OT disponibles
+            </button>
             <button className="btn btn-ghost" onClick={() => setMostrarNotificaciones(true)}>
               Destinatarios del listado
             </button>
@@ -253,6 +261,7 @@ export function OperativosPage() {
       )}
 
       {mostrarNotificaciones && <NotificacionesModal onCerrar={() => setMostrarNotificaciones(false)} />}
+      {mostrarOt && <OtModal onCerrar={() => setMostrarOt(false)} />}
 
       {vistaEfectiva === 'analisis' ? (
         <AnalisisOperativos />
@@ -294,6 +303,7 @@ export function OperativosPage() {
             seleccion={seleccion}
             filtros={filtros}
             vista={vista}
+            otsDisponibles={otsActivas}
             onToggleCitar={toggleCitar}
             onSetTurno={setTurno}
             onSetCampo={setCampo}
