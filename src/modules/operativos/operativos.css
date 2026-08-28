@@ -1,5 +1,9 @@
 .wrap {
-  padding-bottom: 90px;
+  /* Espacio reservado para que la barra fija de abajo (.op-action-bar) no
+     tape la última fila/tarjeta. Con Rechazar/Aprobar sumados a Limpiar/
+     Copiar/Guardar, en pantallas no ultra-anchas la barra puede pasar a
+     ocupar dos líneas — 90px se quedaba corto para ese caso. */
+  padding-bottom: 140px;
 }
 
 .op-status-line {
@@ -508,7 +512,8 @@
   padding: 14px 28px;
   display: flex;
   align-items: center;
-  gap: 14px;
+  flex-wrap: wrap;
+  gap: 10px 14px;
   z-index: 40;
   box-shadow: 0 -2px 10px rgba(15, 23, 42, 0.04);
 }
