@@ -268,7 +268,7 @@ export function OperativosPage() {
       ) : vistaEfectiva === 'validacion' ? (
         <ValidacionOperativos onAbrir={handleAbrirValidacion} />
       ) : (
-        <>
+        <div className="op-citar-vista">
           <div className="op-status-line">
             <span className={'op-status-dot ' + status} />
             {statusText}
@@ -324,7 +324,7 @@ export function OperativosPage() {
           />
 
           <Toast toast={toast} />
-        </>
+        </div>
       )}
     </div>
   )

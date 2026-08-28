@@ -1,8 +1,10 @@
-.wrap {
-  /* Espacio reservado para que la barra fija de abajo (.op-action-bar) no
-     tape la última fila/tarjeta. Con Rechazar/Aprobar sumados a Limpiar/
-     Copiar/Guardar, en pantallas no ultra-anchas la barra puede pasar a
-     ocupar dos líneas — 90px se quedaba corto para ese caso. */
+/* Espacio reservado para que la barra fija de abajo (.op-action-bar) no
+   tape la última fila/tarjeta. NO se pone en .wrap: esa clase también la
+   usan Búsqueda de Personal y Polivalencia (sin barra fija), y además
+   .wrap ya tiene su propia regla en global.css que pisaba este padding
+   según el orden en que se juntan los CSS. Va en un contenedor propio de
+   la vista Citar. */
+.op-citar-vista {
   padding-bottom: 140px;
 }
 
