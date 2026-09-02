@@ -4,7 +4,6 @@ import { Toolbar } from './components/Toolbar'
 import { OperativosTable } from './components/OperativosTable'
 import { ActionBar } from './components/ActionBar'
 import { NotificacionesModal } from './components/NotificacionesModal'
-import { OtModal } from './components/OtModal'
 import { Toast } from '../../app/components/Toast'
 import { AnalisisOperativos } from './analisis/AnalisisOperativos'
 import { ValidacionOperativos } from './validacion/ValidacionOperativos'
@@ -37,9 +36,8 @@ export function OperativosPage() {
   const [toast, setToast] = useState(null)
   const [vistaPrincipal, setVistaPrincipal] = useState('citar')
   const [mostrarNotificaciones, setMostrarNotificaciones] = useState(false)
-  const [mostrarOt, setMostrarOt] = useState(false)
-  const { ots } = useOt()
-  const otsActivas = useMemo(() => ots.filter((o) => o.activo), [ots])
+  // ots ya viene filtrada a "archivada = false" desde cimomet-v2 (useOt.js)
+  const { ots: otsDisponibles } = useOt()
 
   const {
     seleccion,
@@ -250,9 +248,6 @@ export function OperativosPage() {
             Validación
           </button>
           <div className="op-tabs-spacer">
-            <button className="btn btn-ghost" onClick={() => setMostrarOt(true)}>
-              OT disponibles
-            </button>
             <button className="btn btn-ghost" onClick={() => setMostrarNotificaciones(true)}>
               Destinatarios del listado
             </button>
@@ -261,7 +256,6 @@ export function OperativosPage() {
       )}
 
       {mostrarNotificaciones && <NotificacionesModal onCerrar={() => setMostrarNotificaciones(false)} />}
-      {mostrarOt && <OtModal onCerrar={() => setMostrarOt(false)} />}
 
       {vistaEfectiva === 'analisis' ? (
         <AnalisisOperativos />
@@ -303,7 +297,7 @@ export function OperativosPage() {
             seleccion={seleccion}
             filtros={filtros}
             vista={vista}
-            otsDisponibles={otsActivas}
+            otsDisponibles={otsDisponibles}
             onToggleCitar={toggleCitar}
             onSetTurno={setTurno}
             onSetCampo={setCampo}
