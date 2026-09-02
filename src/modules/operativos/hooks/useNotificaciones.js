@@ -47,5 +47,11 @@ export function useNotificaciones() {
     return data?.[0]
   }
 
-  return { destinatarios, cargando, agregar, actualizar, recargar: cargar }
+  async function eliminar(id) {
+    const { error } = await supabase.rpc('produccion_eliminar_notificacion_operativo', { p_id: id })
+    if (error) throw new Error(error.message)
+    await cargar()
+  }
+
+  return { destinatarios, cargando, agregar, actualizar, eliminar, recargar: cargar }
 }

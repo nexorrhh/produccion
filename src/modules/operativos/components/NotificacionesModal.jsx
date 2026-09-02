@@ -4,7 +4,7 @@ import { useNotificaciones } from '../hooks/useNotificaciones'
 
 export function NotificacionesModal({ onCerrar }) {
   const { user } = useAuth()
-  const { destinatarios, cargando, agregar, actualizar } = useNotificaciones()
+  const { destinatarios, cargando, agregar, actualizar, eliminar } = useNotificaciones()
   const [email, setEmail] = useState('')
   const [nombre, setNombre] = useState('')
   const [error, setError] = useState('')
@@ -30,6 +30,16 @@ export function NotificacionesModal({ onCerrar }) {
     setError('')
     try {
       await actualizar(d.id, { activo: !d.activo }, user.id)
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  async function handleEliminar(d) {
+    setError('')
+    if (!confirm('¿Borrar ' + d.email + '? No se puede deshacer.')) return
+    try {
+      await eliminar(d.id)
     } catch (err) {
       setError(err.message)
     }
@@ -71,6 +81,19 @@ export function NotificacionesModal({ onCerrar }) {
                   {d.nombre && <div className="noti-fila-nombre">{d.nombre}</div>}
                 </div>
                 {!d.activo && <span className="noti-fila-estado">Inactivo</span>}
+                <button
+                  type="button"
+                  className="noti-fila-borrar"
+                  onClick={() => handleEliminar(d)}
+                  title="Borrar"
+                >
+                  <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                    <path d="M10 11v6M14 11v6" />
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                  </svg>
+                </button>
               </div>
             ))}
           </div>
