@@ -24,7 +24,7 @@ function filaDe(d) {
     d.empresa === 'CIMOMET' ? 'Cimomet' : 'Comoing',
     d.desc_puesto || '—',
     turnoDe(d),
-    d.ot || '',
+    d.ot || 'Sin OT',
     d.trabajo || '',
   ]
 }

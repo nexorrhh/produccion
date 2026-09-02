@@ -232,7 +232,7 @@ function FilaEmpleado({ empleado: e, sel, cumplimiento: cmp, otsDisponibles, onT
           disabled={!cited}
           onChange={(ev) => onSetCampo(k, 'ot', ev.target.value)}
         >
-          <option value="">OT</option>
+          <option value="">Sin OT</option>
           {(otsDisponibles || []).map((o) => (
             <option key={o.id} value={o.numero + ' - ' + o.cliente}>
               {o.numero} - {o.cliente}
@@ -355,7 +355,7 @@ function TarjetaEmpleado({ empleado: e, sel, cumplimiento: cmp, otsDisponibles, 
             disabled={!cited}
             onChange={(ev) => onSetCampo(k, 'ot', ev.target.value)}
           >
-            <option value="">Nº OT</option>
+            <option value="">Sin OT</option>
             {(otsDisponibles || []).map((o) => (
               <option key={o.id} value={o.numero + ' - ' + o.cliente}>
                 {o.numero} - {o.cliente}
