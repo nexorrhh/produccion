@@ -41,11 +41,9 @@ export function AuditoriaPage() {
           <h1 className="aud-titulo">Auditoría de uso — cimomet-v2</h1>
           <div className="aud-sub">Solo lectura, no modifica nada en cimomet-v2.</div>
           <div className="aud-sub aud-sub-pendiente">
-            Fabricación (Armado/Soldadura) todavía no tiene eventos por cambio de % —
-            falta correr <code>fix_historial_avances_produccion.sql</code> en cimomet-v2
-            (la tabla <code>avances_produccion_historial</code> no existe todavía). Mientras
-            tanto se muestra la última foto de cada avance (columna "actualizado_por"), no
-            el historial de cambios.
+            Fabricación (Armado/Soldadura) muestra el último % cargado de cada avance y
+            quién/cuándo lo tocó por última vez — no el historial completo de cada cambio
+            (0%→10%→50%…), que requeriría una migración opcional en cimomet-v2.
           </div>
         </div>
         <div className="aud-controles">
