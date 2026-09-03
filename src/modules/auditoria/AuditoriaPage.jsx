@@ -40,6 +40,13 @@ export function AuditoriaPage() {
         <div>
           <h1 className="aud-titulo">Auditoría de uso — cimomet-v2</h1>
           <div className="aud-sub">Solo lectura, no modifica nada en cimomet-v2.</div>
+          <div className="aud-sub aud-sub-pendiente">
+            Fabricación (Armado/Soldadura) todavía no tiene eventos por cambio de % —
+            falta correr <code>fix_historial_avances_produccion.sql</code> en cimomet-v2
+            (la tabla <code>avances_produccion_historial</code> no existe todavía). Mientras
+            tanto se muestra la última foto de cada avance (columna "actualizado_por"), no
+            el historial de cambios.
+          </div>
         </div>
         <div className="aud-controles">
           <select value={diasRango} onChange={(e) => setDiasRango(Number(e.target.value))}>
