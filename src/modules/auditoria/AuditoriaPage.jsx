@@ -1,27 +1,42 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useEventosAuditoria } from './hooks/useEventosAuditoria'
-import { SECTORES } from './lib/fuentesAuditoria'
-import { ResumenDiario } from './components/ResumenDiario'
-import { TablaEventos } from './components/TablaEventos'
+import { VistaDia } from './components/VistaDia'
 import { ErroresFuentes } from './components/ErroresFuentes'
 import { cimometV2 } from '../../app/cimometV2Client'
 import './auditoria.css'
+
+function hoyISO() {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function sumarDias(fechaISO, n) {
+  const d = new Date(fechaISO + 'T00:00:00')
+  d.setDate(d.getDate() + n)
+  return d.toISOString().slice(0, 10)
+}
+
+function fechaLarga(fechaISO) {
+  return new Date(fechaISO + 'T00:00:00').toLocaleDateString('es-AR', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  })
+}
 
 // Panel de auditoría de uso de cimomet-v2 — SOLO LECTURA. Ninguna función de
 // este módulo escribe en la base de cimomet-v2 (ver useEventosAuditoria.js,
 // useUsuariosCimometV2.js, useOtsCimometV2.js: todas las consultas son
 // select-only). Visible solo para gerente_produccion/admin_sistema, ver
 // src/app/moduleRegistry.jsx.
+//
+// Un día a la vez (registro diario, se navega con las flechas) en vez de un
+// listado largo con filtros — pensado para que verificar "¿se usó cada
+// sector hoy?" sea un vistazo, no una búsqueda.
 export function AuditoriaPage() {
-  const [tab, setTab] = useState('resumen')
-  const [diasRango, setDiasRango] = useState(30)
-  const [sectorFiltro, setSectorFiltro] = useState('')
-  const { eventos, erroresPorFuente, cargando, recargar } = useEventosAuditoria({ diasRango })
-
-  const eventosFiltrados = useMemo(
-    () => (sectorFiltro ? eventos.filter((e) => e.sector === sectorFiltro) : eventos),
-    [eventos, sectorFiltro]
-  )
+  const [fecha, setFecha] = useState(hoyISO)
+  const { eventos, erroresPorFuente, cargando, recargar } = useEventosAuditoria({ fecha })
+  const esHoy = fecha === hoyISO()
 
   if (!cimometV2) {
     return (
@@ -40,52 +55,36 @@ export function AuditoriaPage() {
         <div>
           <h1 className="aud-titulo">Auditoría de uso — cimomet-v2</h1>
           <div className="aud-sub">Solo lectura, no modifica nada en cimomet-v2.</div>
-          <div className="aud-sub aud-sub-pendiente">
-            Fabricación (Armado/Soldadura) muestra el último % cargado de cada avance y
-            quién/cuándo lo tocó por última vez — no el historial completo de cada cambio
-            (0%→10%→50%…), que requeriría una migración opcional en cimomet-v2.
-          </div>
         </div>
-        <div className="aud-controles">
-          <select value={diasRango} onChange={(e) => setDiasRango(Number(e.target.value))}>
-            <option value={7}>Últimos 7 días</option>
-            <option value={30}>Últimos 30 días</option>
-            <option value={90}>Últimos 90 días</option>
-          </select>
-          <button type="button" className="btn" onClick={recargar} disabled={cargando}>
-            {cargando ? 'Actualizando…' : 'Actualizar'}
+      </div>
+
+      <div className="aud-nav-dia">
+        <button type="button" className="btn" onClick={() => setFecha((f) => sumarDias(f, -1))}>
+          ← Día anterior
+        </button>
+        <div className="aud-fecha-actual">
+          <input type="date" value={fecha} max={hoyISO()} onChange={(e) => setFecha(e.target.value)} />
+          <span className="aud-fecha-label">
+            {fechaLarga(fecha)}
+            {esHoy ? ' · Hoy' : ''}
+          </span>
+        </div>
+        <button type="button" className="btn" onClick={() => setFecha((f) => sumarDias(f, 1))} disabled={esHoy}>
+          Día siguiente →
+        </button>
+        {!esHoy && (
+          <button type="button" className="btn btn-ghost" onClick={() => setFecha(hoyISO())}>
+            Volver a hoy
           </button>
-        </div>
+        )}
+        <button type="button" className="btn aud-btn-actualizar" onClick={recargar} disabled={cargando}>
+          {cargando ? 'Actualizando…' : 'Actualizar'}
+        </button>
       </div>
 
       <ErroresFuentes errores={erroresPorFuente} />
 
-      <div className="aud-tabs">
-        <button className={tab === 'resumen' ? 'active' : ''} onClick={() => setTab('resumen')}>
-          Resumen diario
-        </button>
-        <button className={tab === 'eventos' ? 'active' : ''} onClick={() => setTab('eventos')}>
-          Eventos
-        </button>
-      </div>
-
-      {tab === 'resumen' ? (
-        <ResumenDiario eventos={eventos} diasRango={diasRango} cargando={cargando} />
-      ) : (
-        <>
-          <div className="aud-filtros">
-            <select value={sectorFiltro} onChange={(e) => setSectorFiltro(e.target.value)}>
-              <option value="">Todos los sectores</option>
-              {SECTORES.map((s) => (
-                <option key={s.key} value={s.key}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <TablaEventos eventos={eventosFiltrados} cargando={cargando} />
-        </>
-      )}
+      <VistaDia eventos={eventos} cargando={cargando} />
     </div>
   )
 }

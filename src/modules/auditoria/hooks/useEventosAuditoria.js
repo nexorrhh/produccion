@@ -1,25 +1,26 @@
 import { useCallback, useEffect, useState } from 'react'
 import { cimometV2 } from '../../../app/cimometV2Client'
-import { FUENTES, FUENTES_SOLO_CONTEO } from '../lib/fuentesAuditoria'
+import { FUENTES } from '../lib/fuentesAuditoria'
 import { useUsuariosCimometV2 } from './useUsuariosCimometV2'
 import { useOtsCimometV2 } from './useOtsCimometV2'
 
-function diasAtrasISO(n) {
-  const d = new Date()
-  d.setDate(d.getDate() - n)
-  return d.toISOString()
+// Rango [00:00, 24:00) del día pedido, en hora local del navegador.
+function rangoDelDia(fechaISO) {
+  const desde = new Date(fechaISO + 'T00:00:00')
+  const hasta = new Date(fechaISO + 'T00:00:00')
+  hasta.setDate(hasta.getDate() + 1)
+  return { desde: desde.toISOString(), hasta: hasta.toISOString() }
 }
 
 // Pide cada fuente de fuentesAuditoria.js POR SEPARADO, con su propio
-// try/catch — si una tabla/columna no existe con ese nombre, esa fuente
-// puntual queda registrada en erroresPorFuente y el resto de la pantalla
-// sigue funcionando. Nunca escribe nada: todas las consultas acá son
-// select-only (ver plan del módulo).
-export function useEventosAuditoria({ diasRango = 30 } = {}) {
+// try/catch, acotado a UN SOLO DÍA — si una tabla/columna no existe con ese
+// nombre, esa fuente puntual queda registrada en erroresPorFuente y el resto
+// de la pantalla sigue funcionando. Nunca escribe nada: todas las consultas
+// acá son select-only (ver plan del módulo).
+export function useEventosAuditoria({ fecha }) {
   const { usuarios } = useUsuariosCimometV2()
   const { ots } = useOtsCimometV2()
   const [eventos, setEventos] = useState([])
-  const [conteos, setConteos] = useState([])
   const [erroresPorFuente, setErroresPorFuente] = useState([])
   const [cargando, setCargando] = useState(true)
 
@@ -29,7 +30,7 @@ export function useEventosAuditoria({ diasRango = 30 } = {}) {
       return
     }
     setCargando(true)
-    const desde = diasAtrasISO(diasRango)
+    const { desde, hasta } = rangoDelDia(fecha)
     const errores = []
     const todos = []
 
@@ -39,13 +40,14 @@ export function useEventosAuditoria({ diasRango = 30 } = {}) {
           .from(fuente.tabla)
           .select(fuente.columnas)
           .gte(fuente.columnaFecha, desde)
+          .lt(fuente.columnaFecha, hasta)
           .order(fuente.columnaFecha, { ascending: false })
-          .limit(500)
+          .limit(300)
         if (error) throw error
 
         ;(data || []).forEach((row) => {
-          const fecha = row[fuente.columnaFecha] || (fuente.columnaFechaAlt ? row[fuente.columnaFechaAlt] : null)
-          if (!fecha) return
+          const filaFecha = row[fuente.columnaFecha] || (fuente.columnaFechaAlt ? row[fuente.columnaFechaAlt] : null)
+          if (!filaFecha) return
 
           let autorNombre = null
           let autorRol = null
@@ -65,7 +67,7 @@ export function useEventosAuditoria({ diasRango = 30 } = {}) {
             id: fuente.tabla + '-' + row.id,
             tabla: fuente.tabla,
             sector: fuente.sector,
-            fecha,
+            fecha: filaFecha,
             autorNombre,
             autorRol,
             ot,
@@ -82,28 +84,14 @@ export function useEventosAuditoria({ diasRango = 30 } = {}) {
       }
     }
 
-    todos.sort((a, b) => (a.fecha < b.fecha ? 1 : -1))
-
-    const conteosResultado = []
-    for (const fc of FUENTES_SOLO_CONTEO) {
-      try {
-        const { count, error } = await cimometV2.from(fc.tabla).select('*', { count: 'exact', head: true })
-        if (error) throw error
-        conteosResultado.push({ tabla: fc.tabla, sector: fc.sector, descripcion: fc.descripcion, cantidad: count })
-      } catch (err) {
-        errores.push({ tabla: fc.tabla, sector: fc.sector, mensaje: err.message })
-      }
-    }
-
     setEventos(todos)
-    setConteos(conteosResultado)
     setErroresPorFuente(errores)
     setCargando(false)
-  }, [diasRango, usuarios, ots])
+  }, [fecha, usuarios, ots])
 
   useEffect(() => {
     cargar()
   }, [cargar])
 
-  return { eventos, conteos, erroresPorFuente, cargando, recargar: cargar }
+  return { eventos, erroresPorFuente, cargando, recargar: cargar }
 }

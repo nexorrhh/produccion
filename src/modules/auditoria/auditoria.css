@@ -3,11 +3,6 @@
 }
 
 .aud-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
   margin-bottom: 16px;
 }
 .aud-titulo {
@@ -20,67 +15,39 @@
   color: var(--text2);
   margin-top: 4px;
 }
-.aud-sub-pendiente {
-  color: #92400e;
-  max-width: 640px;
-}
-.aud-sub-pendiente code {
-  background: rgba(245, 158, 11, 0.15);
-  padding: 1px 5px;
-  border-radius: 4px;
-  font-size: 11.5px;
-}
-.aud-controles {
+
+/* Navegador de día */
+.aud-nav-dia {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-.aud-controles select {
-  padding: 9px 12px;
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  font-size: 13.5px;
-  background: var(--surface);
-  color: var(--text);
-}
-
-/* Tabs (mismo look que .op-tabs, autocontenido acá para no depender de
-   operativos.css) */
-.aud-tabs {
-  display: flex;
-  gap: 4px;
+  flex-wrap: wrap;
   margin-bottom: 16px;
-  border-bottom: 1px solid var(--border);
 }
-.aud-tabs > button {
-  padding: 9px 16px;
-  border: none;
-  background: transparent;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--text2);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-}
-.aud-tabs > button:hover {
-  color: var(--text);
-}
-.aud-tabs > button.active {
-  color: var(--com);
-  border-bottom-color: var(--com);
-}
-
-.aud-filtros {
-  margin-bottom: 14px;
-}
-.aud-filtros select {
-  padding: 9px 12px;
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  font-size: 13.5px;
+.aud-fecha-actual {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
   background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.aud-fecha-actual input[type='date'] {
+  border: none;
+  font-size: 13px;
+  color: var(--text2);
+  background: transparent;
+}
+.aud-fecha-label {
+  font-size: 14px;
+  font-weight: 700;
   color: var(--text);
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+.aud-btn-actualizar {
+  margin-left: auto;
 }
 
 /* Banner de errores por fuente */
@@ -112,73 +79,83 @@
   margin-bottom: 4px;
 }
 
-/* Tabla (resumen diario + eventos) */
-.aud-tabla-wrap {
+/* Grilla de tarjetas por sector — un vistazo del día completo */
+.aud-dia-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
+}
+.aud-sector-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-  overflow-x: auto;
+  box-shadow: var(--shadow-sm);
+  padding: 14px 16px;
 }
-.aud-tabla {
-  width: 100%;
-  min-width: 640px;
-  border-collapse: separate;
-  border-spacing: 0;
+.aud-sector-card.vacio {
+  background: rgba(239, 68, 68, 0.04);
+  border-color: rgba(239, 68, 68, 0.25);
 }
-.aud-tabla thead th {
-  background: var(--bg-soft);
-  padding: 12px 14px;
-  text-align: left;
+.aud-sector-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.aud-sector-nombre {
+  font-size: 14.5px;
+  font-weight: 700;
+}
+.aud-sector-count {
   font-size: 11px;
   font-weight: 700;
-  color: var(--text2);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
-}
-.aud-tabla thead th.center {
-  text-align: center;
-}
-.aud-tabla tbody td {
-  padding: 10px 14px;
-  border-bottom: 1px solid #f1f5f9;
-  vertical-align: middle;
-  font-size: 13px;
-}
-.aud-tabla tbody td.center {
-  text-align: center;
-}
-.aud-tabla tbody tr:last-child td {
-  border-bottom: none;
-}
-.aud-tabla tbody tr:hover td {
-  background: #fafcfe;
-}
-.aud-nombre {
-  font-weight: 600;
-}
-.aud-tabla-origen {
-  font-family: 'Consolas', monospace;
-  font-size: 11px;
-  color: var(--text3);
-}
-
-.aud-badge-hoy {
-  display: inline-flex;
-  padding: 3px 12px;
+  padding: 3px 10px;
   border-radius: 20px;
-  font-size: 11px;
-  font-weight: 700;
-}
-.aud-badge-hoy.si {
   background: rgba(34, 197, 94, 0.12);
   color: #15803d;
+  white-space: nowrap;
 }
-.aud-badge-hoy.no {
+.aud-sector-count.cero {
   background: rgba(239, 68, 68, 0.1);
   color: #b91c1c;
+}
+.aud-sector-sin-eventos {
+  font-size: 12.5px;
+  color: #b91c1c;
+}
+.aud-sector-eventos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 260px;
+  overflow-y: auto;
+}
+.aud-sector-eventos li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 0;
+  border-top: 1px solid #f1f5f9;
+  font-size: 12.5px;
+}
+.aud-sector-eventos li:first-child {
+  border-top: none;
+}
+.aud-evento-hora {
+  font-family: 'Consolas', monospace;
+  font-size: 11.5px;
+  color: var(--text3);
+  flex-shrink: 0;
+}
+.aud-evento-autor {
+  font-weight: 600;
+  color: var(--text);
+  flex-shrink: 0;
+}
+.aud-evento-desc {
+  color: var(--text2);
 }
 
 .aud-vacio {
