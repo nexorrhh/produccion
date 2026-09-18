@@ -137,52 +137,84 @@ export function OperativosPage() {
     }
   }
 
+  function construirDetalle() {
+    return Object.keys(seleccion).map((k) => {
+      const e = empleados.find((x) => key(x) === k)
+      const s = seleccion[k]
+      return {
+        legajo: e.legajo,
+        empresa: e.empresa,
+        apellido_y_nombre: e.apellido_y_nombre,
+        desc_puesto: e.desc_puesto,
+        turno_manana: !!s.manana,
+        turno_tarde: !!s.tarde,
+        ot: s.ot || null,
+        trabajo: s.trabajo || null,
+      }
+    })
+  }
+
+  function nombrePdf() {
+    return `listado-convocados-${fecha}.pdf`
+  }
+
+  function handleDescargarPdf() {
+    const detalle = construirDetalle()
+    if (!detalle.length) {
+      mostrarToast('No hay personas citadas para generar el PDF', 'error')
+      return
+    }
+    generarPdfListadoConvocados({ fecha, dia, tipo, detalle, mapaClasif }).save(nombrePdf())
+  }
+
+  // La aprobación (que la citación quede "validada") y el envío del mail
+  // son dos pasos independientes: si el mail falla (p. ej. límite de envíos
+  // del proveedor SMTP), la citación igual queda aprobada y el PDF se baja
+  // automático para poder mandarlo a mano — no se debe bloquear la
+  // aprobación por un problema de correo, que está fuera de nuestro control.
   async function handleAprobar() {
     setGuardando(true)
     try {
-      const sels = Object.keys(seleccion)
-      const detalle = sels.map((k) => {
-        const e = empleados.find((x) => key(x) === k)
-        const s = seleccion[k]
-        return {
-          legajo: e.legajo,
-          empresa: e.empresa,
-          apellido_y_nombre: e.apellido_y_nombre,
-          desc_puesto: e.desc_puesto,
-          turno_manana: !!s.manana,
-          turno_tarde: !!s.tarde,
-          ot: s.ot || null,
-          trabajo: s.trabajo || null,
-        }
-      })
-      const pdfBase64 = generarPdfListadoConvocados({ fecha, dia, tipo, detalle, mapaClasif })
-      const { data, error } = await supabase.functions.invoke('enviar-listado-convocados', {
-        body: {
-          fecha,
-          tipo,
-          diaSemana: dia,
-          cantidad: detalle.length,
-          pdfBase64,
-          aprobadoPor: user.nombre_apellido,
-        },
-      })
-      if (error) {
-        // supabase-js solo da un mensaje genérico ("Edge Function returned
-        // a non-2xx status code") — el detalle real está en el cuerpo de
-        // la respuesta, que queda en error.context.
-        let detalle = error.message
-        try {
-          const body = await error.context.json()
-          if (body?.error) detalle = body.error
-        } catch {
-          // si el cuerpo no es JSON, nos quedamos con error.message
-        }
-        throw new Error(detalle)
-      }
+      const detalle = construirDetalle()
+      const doc = generarPdfListadoConvocados({ fecha, dia, tipo, detalle, mapaClasif })
+
       await aprobar(user)
-      mostrarToast('Listado aprobado y enviado a ' + (data?.enviados ?? 0) + ' destinatario(s)', 'ok')
+
+      try {
+        const pdfBase64 = doc.output('datauristring').split(',')[1]
+        const { data, error } = await supabase.functions.invoke('enviar-listado-convocados', {
+          body: {
+            fecha,
+            tipo,
+            diaSemana: dia,
+            cantidad: detalle.length,
+            pdfBase64,
+            aprobadoPor: user.nombre_apellido,
+          },
+        })
+        if (error) {
+          // supabase-js solo da un mensaje genérico ("Edge Function returned
+          // a non-2xx status code") — el detalle real está en el cuerpo de
+          // la respuesta, que queda en error.context.
+          let detalleErr = error.message
+          try {
+            const body = await error.context.json()
+            if (body?.error) detalleErr = body.error
+          } catch {
+            // si el cuerpo no es JSON, nos quedamos con error.message
+          }
+          throw new Error(detalleErr)
+        }
+        mostrarToast('Listado aprobado y enviado a ' + (data?.enviados ?? 0) + ' destinatario(s)', 'ok')
+      } catch (mailErr) {
+        doc.save(nombrePdf())
+        mostrarToast(
+          'Citación aprobada. No se pudo enviar el mail (' + mailErr.message + ') — se descargó el PDF para enviarlo a mano.',
+          'error'
+        )
+      }
     } catch (err) {
-      mostrarToast('No se pudo enviar el mail, la citación sigue pendiente: ' + err.message, 'error')
+      mostrarToast('No se pudo aprobar la citación: ' + err.message, 'error')
     } finally {
       setGuardando(false)
     }
@@ -309,6 +341,7 @@ export function OperativosPage() {
             onLimpiar={handleLimpiar}
             onCopiarUltima={handleCopiarUltima}
             onGuardar={handleGuardar}
+            onDescargarPdf={handleDescargarPdf}
             guardando={guardando}
             puedeValidar={puedeValidar(user)}
             estadoValidacion={validacion.estado}

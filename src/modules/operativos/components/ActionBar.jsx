@@ -4,6 +4,7 @@ export function ActionBar({
   onLimpiar,
   onCopiarUltima,
   onGuardar,
+  onDescargarPdf,
   guardando,
   puedeValidar,
   estadoValidacion,
@@ -42,6 +43,19 @@ export function ActionBar({
           <polyline points="7 3 7 8 15 8" />
         </svg>
         {guardando ? 'Guardando…' : 'Guardar citación'}
+      </button>
+      <button
+        className="btn"
+        onClick={onDescargarPdf}
+        disabled={citadosCount === 0}
+        title="Descargar el listado en PDF para enviarlo a mano (útil si el mail automático falla)"
+      >
+        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <path d="M12 15V3" />
+        </svg>
+        Descargar PDF
       </button>
       {mostrarValidacion && (
         <>

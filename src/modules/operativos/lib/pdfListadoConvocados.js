@@ -119,6 +119,9 @@ export function generarPdfListadoConvocados({ fecha, dia, tipo, detalle, mapaCla
     })
   }
 
-  // base64 puro (sin el prefijo "data:application/pdf;filename=...;base64,")
-  return doc.output('datauristring').split(',')[1]
+  // Se devuelve el documento jsPDF en vez de un base64 fijo: el llamador
+  // decide si lo manda por mail (doc.output('datauristring')) o lo baja
+  // directo a disco (doc.save(...)) — hace falta lo segundo para poder
+  // enviarlo a mano cuando el mail automático falla.
+  return doc
 }
