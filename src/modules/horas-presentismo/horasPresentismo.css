@@ -244,6 +244,231 @@
   margin-bottom: 14px;
 }
 
+/* Indicadores */
+.hp-seccion {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 16px 18px;
+  margin-bottom: 16px;
+}
+.hp-seccion-titulo {
+  font-size: 13.5px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.hp-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.hp-kpi {
+  background: var(--bg-soft);
+  border-left: 3px solid;
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+.hp-kpi-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.hp-kpi-valor {
+  font-size: 20px;
+  font-weight: 800;
+  margin-top: 3px;
+}
+.hp-th-ordenable {
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Novedades */
+.hp-nav-dia {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.hp-fecha-actual {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.hp-fecha-actual input[type='date'] {
+  border: none;
+  font-size: 13px;
+  color: var(--text2);
+  background: transparent;
+}
+.hp-fecha-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+.hp-vacio-chico {
+  font-size: 12.5px;
+  color: var(--text3);
+}
+.hp-novedad-grupos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+.hp-novedad-grupo-titulo {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 6px;
+}
+.hp-novedad-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.hp-novedad-lista li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 7px;
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+  font-size: 12.5px;
+}
+.hp-novedad-lista li:first-child {
+  border-top: none;
+}
+.hp-novedad-nombre {
+  font-weight: 600;
+}
+.hp-novedad-empresa {
+  font-size: 11px;
+  color: var(--text3);
+}
+.hp-novedad-detalle {
+  color: var(--text2);
+}
+
+/* Por persona / Ficha */
+.hp-input-busqueda {
+  padding: 8px 12px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  font-size: 13px;
+  min-width: 200px;
+  background: var(--surface);
+  color: var(--text);
+}
+.hp-fila-activa {
+  background: var(--com-bg);
+}
+.hp-detalle-dia-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 16px 18px;
+  margin-top: 16px;
+}
+.hp-calendario {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+  gap: 6px;
+}
+.hp-dia-celda {
+  border: 1.5px solid;
+  border-radius: 6px;
+  padding: 6px 4px;
+  text-align: center;
+  background: var(--bg-soft);
+}
+.hp-dia-fecha {
+  font-size: 10px;
+  color: var(--text3);
+}
+.hp-dia-letra {
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+.hp-dia-horas {
+  font-size: 9.5px;
+  color: var(--text2);
+}
+
+/* Ficha */
+.hp-ficha-buscador {
+  position: relative;
+  margin-bottom: 14px;
+  max-width: 360px;
+}
+.hp-ficha-sugerencias {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+.hp-ficha-sugerencias li {
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.hp-ficha-sugerencias li:hover {
+  background: var(--bg-soft);
+}
+.hp-ficha-grupo-selector {
+  margin-bottom: 16px;
+}
+.hp-sector-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.hp-ficha-checklist {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 4px 12px;
+  max-height: 260px;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+.hp-ficha-check-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  padding: 3px 0;
+}
+
 @media (max-width: 900px) {
   .hp-filtros {
     flex-direction: column;
