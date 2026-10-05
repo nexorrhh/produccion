@@ -30,7 +30,8 @@ function esSabadoODomingo(fechaISO) {
 // Agrupa las filas de rrhh_horas_detalle de UNA persona+período, una por
 // día, y arma el detalle completo: estado, balance (según si es mensual o
 // quincenal — mismo criterio que presentismo-personas.js de Tablero_RRHH),
-// horas por OT ese día (cruzando horas_ot_detalle) y motivo de ausencia
+// horas por OT ese día (cruzando horas_ot_detalle, con el desglose por OT
+// en `otDesglose` para el tooltip de la barra) y motivo de ausencia
 // (cruzando rrhh_tardanzas_salidas + la categorización de
 // rrhh_justificacion_config) cuando el día es una falta.
 export function construirDetalleDiario({
@@ -81,7 +82,14 @@ export function construirDetalleDiario({
     .filter((f) => f.legajo === legajo && !f.anomalo)
     .forEach((f) => {
       const d = porDia.get(f.fecha)
-      if (d) d.horasOt += Number(f.horas || 0)
+      if (!d) return
+      d.horasOt += Number(f.horas || 0)
+      if (!d._otMap) d._otMap = new Map()
+      const clave = f.ot || '__sin_ot__'
+      if (!d._otMap.has(clave)) {
+        d._otMap.set(clave, { ot: f.ot, cliente: f.cliente, proyecto: f.proyecto_nombre, horas: 0 })
+      }
+      d._otMap.get(clave).horas += Number(f.horas || 0)
     })
 
   const tardanzaPorFecha = new Map()
@@ -100,8 +108,11 @@ export function construirDetalleDiario({
       const normalTrabajadas = d.hs_trabajadas - d.extra50 - d.extra100
       const balance = esMensual ? d.hs_reales - d.hs_esperadas : normalTrabajadas - d.hs_esperadas
       const estado = estadoDeDia(d, tardanza, mapaCategoriaAusencia)
+      const otDesglose = d._otMap ? [...d._otMap.values()].sort((a, b) => b.horas - a.horas) : []
       return {
         ...d,
+        _otMap: undefined,
+        otDesglose,
         balance,
         normalTrabajadas,
         estado,
@@ -126,7 +137,12 @@ function estadoDeDia(d, tardanza, mapaCategoriaAusencia) {
     return d.horasOt > 0 ? 'sin_tango' : 'libre'
   }
 
-  if (d.hs_esperadas === 0) return 'libre'
+  if (d.hs_esperadas === 0) {
+    // Sin jornada esperada ese día (p. ej. un sábado) pero con horas
+    // reales cargadas en Tango: no es un día libre, es presencia extra
+    // (un operativo de sábado, por ejemplo) — antes esto se perdía.
+    return d.hs_reales > 0 ? 'extra' : 'libre'
+  }
   if (d.hs_reales > d.hs_esperadas) return 'extra'
   if (d.hs_reales >= d.hs_esperadas) return 'ok'
 

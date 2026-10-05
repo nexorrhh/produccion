@@ -515,6 +515,9 @@
 /* Tabla de detalle diario completa */
 .hp-tabla-dias {
   margin-top: 16px;
+  /* El tooltip de la barra de OT necesita salirse de la celda — ver
+     .hp-ot-tooltip. */
+  overflow: visible;
 }
 .hp-dia-motivo {
   color: var(--text3);
@@ -527,16 +530,81 @@
   min-width: 140px;
 }
 .hp-ot-bar-track {
+  position: relative;
   flex: 1;
   height: 10px;
   border-radius: 5px;
   background: var(--bg-soft);
-  overflow: hidden;
+  cursor: default;
 }
 .hp-ot-bar-fill {
   height: 100%;
   background: var(--text);
   border-radius: 5px;
+}
+
+/* Tooltip con el desglose por OT de ese día */
+.hp-ot-tooltip {
+  position: absolute;
+  z-index: 30;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%) translateY(4px);
+  min-width: 220px;
+  max-width: 280px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 12px 14px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  pointer-events: none;
+}
+.hp-ot-bar-track:hover .hp-ot-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+.hp-ot-tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.hp-ot-tooltip-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.hp-ot-tooltip-lista li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--text2);
+}
+.hp-ot-tooltip-ot {
+  font-weight: 700;
+  color: var(--text);
+  flex-shrink: 0;
+}
+.hp-ot-tooltip-cliente {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Ficha */

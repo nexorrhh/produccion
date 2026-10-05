@@ -64,7 +64,7 @@ function KpisPersona({ dias }) {
         <div className="hp-kpi-persona-valor">{balance >= 0 ? '+' : ''}{fmtHorasMin(balance)}</div>
         <div className="hp-kpi-persona-label">Balance del período</div>
         <div className="hp-kpi-persona-sub">
-          {fmtHorasMin(dias.reduce((s, d) => s + d.hs_trabajadas, 0))} trabajadas de{' '}
+          {fmtHorasMin(dias.reduce((s, d) => s + d.normalTrabajadas, 0))} trabajadas de{' '}
           {fmtHorasMin(dias.reduce((s, d) => s + d.hs_esperadas, 0))} esperadas
         </div>
       </div>
@@ -121,7 +121,7 @@ function TablaDetalleDiario({ dias }) {
                   {d.balance >= 0 ? '±' : ''}
                   {fmtHoras(d.balance)}
                 </td>
-                <td>{fmtHoras(d.hs_trabajadas)}</td>
+                <td>{fmtHoras(d.normalTrabajadas)}</td>
                 <td>{d.extra50 > 0 ? fmtHoras(d.extra50) : '—'}</td>
                 <td>{d.extra100 > 0 ? fmtHoras(d.extra100) : '—'}</td>
                 <td>{d.hs_justificadas > 0 ? fmtHoras(d.hs_justificadas) : '—'}</td>
@@ -130,6 +130,21 @@ function TablaDetalleDiario({ dias }) {
                     <div className="hp-ot-bar-celda">
                       <div className="hp-ot-bar-track">
                         <div className="hp-ot-bar-fill" style={{ width: (d.horasOt / maxOt) * 100 + '%' }} />
+                        <div className="hp-ot-tooltip">
+                          <div className="hp-ot-tooltip-header">
+                            <span>OT del día</span>
+                            <b>{fmtHoras(d.horasOt)}</b>
+                          </div>
+                          <ul className="hp-ot-tooltip-lista">
+                            {d.otDesglose.map((o) => (
+                              <li key={o.ot || '__sin_ot__'}>
+                                <span className="hp-ot-tooltip-ot">{o.ot || 'Sin OT'}</span>
+                                <span className="hp-ot-tooltip-cliente">{o.cliente || o.proyecto || '—'}</span>
+                                <b>{fmtHoras(o.horas)}</b>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       </div>
                       <span>{fmtHoras(d.horasOt)}</span>
                     </div>
