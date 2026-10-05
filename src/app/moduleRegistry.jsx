@@ -3,6 +3,7 @@ import { BusquedaPersonalPage } from '../modules/busqueda-personal/BusquedaPerso
 import { PolivalenciaPage } from '../modules/polivalencia/PolivalenciaPage'
 import { AuditoriaPage } from '../modules/auditoria/AuditoriaPage'
 import { PlantelPage } from '../modules/plantel/PlantelPage'
+import { HorasPresentismoPage } from '../modules/horas-presentismo/HorasPresentismoPage'
 
 // Registro central de módulos habilitados. Agregar o sacar un módulo del
 // panel es agregar/sacar una entrada acá — no hay que tocar Sidebar,
@@ -36,6 +37,15 @@ export const moduleRegistry = [
     element: <PlantelPage />,
     // Datos de personal (RRHH) solo de consulta — mismo criterio que
     // Auditoría y Búsqueda de Personal.
+    roles: ['gerente_produccion', 'admin_sistema'],
+  },
+  {
+    key: 'horas-presentismo',
+    label: 'Horas y Presentismo',
+    path: '/horas-presentismo',
+    element: <HorasPresentismoPage />,
+    // Datos de RRHH (horas, cruce con Tango) solo de consulta — mismo
+    // criterio que Plantel/Auditoría.
     roles: ['gerente_produccion', 'admin_sistema'],
   },
   {

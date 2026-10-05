@@ -1,0 +1,256 @@
+/* Autocontenido a propósito (mismo criterio que Auditoría/Plantel): no
+   depende de clases definidas en otros módulos. */
+
+.hp-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.hp-tabs > button {
+  padding: 9px 16px;
+  border: none;
+  background: transparent;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text2);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.hp-tabs > button:hover {
+  color: var(--text);
+}
+.hp-tabs > button.active {
+  color: var(--com);
+  border-bottom-color: var(--com);
+}
+
+.hp-status-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text2);
+  margin-bottom: 14px;
+}
+.hp-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text3);
+}
+.hp-status-dot.ok {
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+}
+.hp-status-dot.error {
+  background: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+.hp-status-dot.loading {
+  background: #f59e0b;
+}
+
+.hp-error-banner {
+  background: var(--red-bg);
+  border: 1px solid var(--cim-border);
+  color: var(--red);
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 13px;
+}
+.hp-vacio {
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--text2);
+  font-size: 13px;
+}
+.hp-nota {
+  font-size: 11.5px;
+  color: var(--text3);
+  margin-top: 10px;
+}
+
+.hp-select {
+  padding: 8px 10px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  font-size: 13px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.hp-pills {
+  display: flex;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.hp-pills button {
+  padding: 8px 13px;
+  border: none;
+  background: var(--surface);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text2);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.hp-pills button.active {
+  background: var(--com);
+  color: #fff;
+}
+
+/* Gráfico de barras apiladas */
+.hp-graf-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 16px 18px;
+  margin-bottom: 16px;
+}
+.hp-graf-titulo {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text2);
+  margin-bottom: 10px;
+}
+.hp-barras {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.hp-barra-fila {
+  display: grid;
+  grid-template-columns: 90px 1fr 60px;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+.hp-barra-label {
+  color: var(--text2);
+  white-space: nowrap;
+}
+.hp-barra-track {
+  height: 14px;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  background: var(--bg-soft);
+  min-width: 20px;
+}
+.hp-barra-seg-con {
+  background: var(--com);
+}
+.hp-barra-seg-sin {
+  background: var(--text3);
+}
+.hp-barra-total {
+  text-align: right;
+  font-weight: 600;
+  color: var(--text2);
+}
+
+/* Drill-down Horas por OT */
+.hp-drill-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.hp-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.hp-breadcrumb button {
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text2);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius);
+}
+.hp-breadcrumb button:hover {
+  background: var(--bg-soft);
+}
+.hp-breadcrumb button.active {
+  color: var(--com);
+}
+.hp-breadcrumb span {
+  color: var(--text3);
+}
+
+/* Tablas */
+.hp-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.hp-tabla th {
+  text-align: left;
+  padding: 9px 12px;
+  color: var(--text2);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-soft);
+}
+.hp-tabla td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.hp-tabla tbody tr:last-child td {
+  border-bottom: none;
+}
+.hp-tabla-clic tbody tr {
+  cursor: pointer;
+}
+.hp-tabla-clic tbody tr:hover {
+  background: var(--bg-soft);
+}
+
+.hp-chip {
+  display: inline-flex;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid;
+}
+
+/* Cruce de Horas */
+.hp-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 900px) {
+  .hp-filtros {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hp-drill-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
