@@ -16,13 +16,16 @@ import { Ficha } from './components/Ficha'
 import { Loader } from '../../app/components/Loader'
 import './horasPresentismo.css'
 
+// Mismo orden que el menú de Tablero_RRHH (Indicadores, Novedades,
+// Personas, Ficha, Cargar, Horas por OT, Horas Cruce, Parametrización) —
+// salteando Cargar y Parametrización, que quedan fuera de este módulo.
 const TABS = [
-  { key: 'horas-ot', label: 'Horas por OT' },
-  { key: 'cruce', label: 'Cruce de Horas' },
   { key: 'indicadores', label: 'Indicadores' },
   { key: 'novedades', label: 'Novedades' },
   { key: 'personas', label: 'Por persona' },
   { key: 'ficha', label: 'Ficha' },
+  { key: 'horas-ot', label: 'Horas por OT' },
+  { key: 'cruce', label: 'Cruce de Horas' },
 ]
 
 // Módulo porteado de Tablero_RRHH, solo lectura: no incluye las pantallas
@@ -31,7 +34,7 @@ const TABS = [
 // Tablero_RRHH. Tampoco incluye el sub-modo "Chequeo del día (fichadas)"
 // de Novedades, porque implica subir un archivo del reloj biométrico.
 export function HorasPresentismoPage() {
-  const [vista, setVista] = useState('horas-ot')
+  const [vista, setVista] = useState('indicadores')
   const { filas: filasOt, status, statusText } = useHorasOtDetalle()
   const { filas: horasMensual } = useHorasMensual()
   const { filas: horasDetalle } = useHorasDetalle()
