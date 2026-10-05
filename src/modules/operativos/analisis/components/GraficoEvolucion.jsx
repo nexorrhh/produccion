@@ -56,6 +56,7 @@ export function GraficoEvolucion({ datos }) {
     <div className="an-grafico-wrap">
       <svg
         viewBox={`0 0 ${W} ${H}`}
+        preserveAspectRatio="none"
         className="an-grafico-svg"
         onMouseMove={handleMove}
         onMouseLeave={() => setHoverIdx(null)}

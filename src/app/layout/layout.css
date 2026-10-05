@@ -1,3 +1,22 @@
+.app-fade {
+  animation: app-fade-in 0.22s ease;
+}
+@keyframes app-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-fade {
+    animation: none;
+  }
+}
+
 .app-header {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
