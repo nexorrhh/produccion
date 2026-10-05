@@ -4,6 +4,7 @@ import { useClasificacionPuestosPlantel } from './hooks/useClasificacionPuestosP
 import { ResumenPlantel } from './components/ResumenPlantel'
 import { ListadoPlantel } from './components/ListadoPlantel'
 import { CumpleanosAntiguedad } from './components/CumpleanosAntiguedad'
+import { Loader } from '../../app/components/Loader'
 import './plantel.css'
 
 // Módulo de solo lectura: muestra el plantel activo (misma tabla `empleados`
@@ -29,19 +30,26 @@ export function PlantelPage() {
         </button>
       </div>
 
-      <div className="pl-status-line">
-        <span className={'pl-status-dot ' + status} />
-        {statusText}
-      </div>
-
-      {status === 'error' ? (
+      {status === 'loading' ? (
+        <Loader texto="Cargando plantel…" />
+      ) : status === 'error' ? (
         <div className="pl-error-banner">{statusText}</div>
-      ) : vista === 'resumen' ? (
-        <ResumenPlantel empleados={empleados} mapaClasif={mapaClasif} />
-      ) : vista === 'listado' ? (
-        <ListadoPlantel empleados={empleados} mapaClasif={mapaClasif} />
       ) : (
-        <CumpleanosAntiguedad empleados={empleados} mapaClasif={mapaClasif} />
+        <>
+          <div className="pl-status-line">
+            <span className={'pl-status-dot ' + status} />
+            {statusText}
+          </div>
+          <div key={vista} className="app-fade">
+            {vista === 'resumen' ? (
+              <ResumenPlantel empleados={empleados} mapaClasif={mapaClasif} />
+            ) : vista === 'listado' ? (
+              <ListadoPlantel empleados={empleados} mapaClasif={mapaClasif} />
+            ) : (
+              <CumpleanosAntiguedad empleados={empleados} mapaClasif={mapaClasif} />
+            )}
+          </div>
+        </>
       )}
     </div>
   )

@@ -27,13 +27,14 @@ export function ResumenPlantel({ empleados, mapaClasif }) {
       const porPuesto = new Map()
       items.forEach((e) => {
         const nombre = nombrePuesto(e.desc_puesto)
-        if (!porPuesto.has(nombre)) porPuesto.set(nombre, { nombre, cimomet: 0, comoing: 0 })
+        if (!porPuesto.has(nombre)) porPuesto.set(nombre, { nombre, cimomet: 0, comoing: 0, personas: [] })
         const g = porPuesto.get(nombre)
         if (e.empresa === 'CIMOMET') g.cimomet++
         else g.comoing++
+        g.personas.push(e.apellido_y_nombre)
       })
       const puestos = [...porPuesto.values()]
-        .map((p) => ({ ...p, total: p.cimomet + p.comoing }))
+        .map((p) => ({ ...p, total: p.cimomet + p.comoing, personas: [...p.personas].sort((a, b) => a.localeCompare(b)) }))
         .sort((a, b) => b.total - a.total)
       return { ...t, items, puestos }
     }).filter((g) => g.items.length)
@@ -128,7 +129,7 @@ export function ResumenPlantel({ empleados, mapaClasif }) {
           </h3>
           <div className="pl-sector-puestos">
             {g.puestos.map((p) => (
-              <div className="pl-sector-fila" key={p.nombre}>
+              <div className="pl-sector-fila" key={p.nombre} title={p.nombre + ' (' + p.total + ')\n' + p.personas.join('\n')}>
                 <div className="pl-sector-fila-header">
                   <span>{p.nombre}</span>
                   <b>{p.total}</b>

@@ -1,4 +1,5 @@
 import { SECTORES } from '../lib/fuentesAuditoria'
+import { Loader } from '../../../app/components/Loader'
 
 function horaCorta(f) {
   return new Date(f).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
@@ -7,7 +8,7 @@ function horaCorta(f) {
 // Un día, todos los sectores siempre visibles (incluso sin actividad — es
 // justo lo que se quiere controlar), cada uno con su lista de eventos.
 export function VistaDia({ eventos, cargando }) {
-  if (cargando) return <div className="aud-vacio">Cargando…</div>
+  if (cargando) return <Loader texto="Cargando auditoría…" />
 
   const porSector = SECTORES.map((s) => ({
     sector: s,

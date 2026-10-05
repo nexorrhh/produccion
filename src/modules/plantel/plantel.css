@@ -226,6 +226,9 @@
   flex-direction: column;
   gap: 10px;
 }
+.pl-sector-fila {
+  cursor: help;
+}
 .pl-sector-fila-header {
   display: flex;
   justify-content: space-between;

@@ -5,6 +5,7 @@ import { useEmpleadosHP } from './hooks/useEmpleadosHP'
 import { useClasificacionPuestosHP } from './hooks/useClasificacionPuestosHP'
 import { HorasOT } from './components/HorasOT'
 import { CruceHoras } from './components/CruceHoras'
+import { Loader } from '../../app/components/Loader'
 import './horasPresentismo.css'
 
 // Fase 1 de este módulo: el lado "Horas" (Horas por OT + Cruce de Horas),
@@ -31,17 +32,24 @@ export function HorasPresentismoPage() {
         </button>
       </div>
 
-      <div className="hp-status-line">
-        <span className={'hp-status-dot ' + status} />
-        {statusText}
-      </div>
-
-      {status === 'error' ? (
+      {status === 'loading' ? (
+        <Loader texto="Cargando horas…" />
+      ) : status === 'error' ? (
         <div className="hp-error-banner">{statusText}</div>
-      ) : vista === 'horas-ot' ? (
-        <HorasOT filas={filasOt} />
       ) : (
-        <CruceHoras filasOt={filasOt} horasMensual={horasMensual} empleados={empleados} mapaClasif={mapaClasif} />
+        <>
+          <div className="hp-status-line">
+            <span className={'hp-status-dot ' + status} />
+            {statusText}
+          </div>
+          <div key={vista} className="app-fade">
+            {vista === 'horas-ot' ? (
+              <HorasOT filas={filasOt} />
+            ) : (
+              <CruceHoras filasOt={filasOt} horasMensual={horasMensual} empleados={empleados} mapaClasif={mapaClasif} />
+            )}
+          </div>
+        </>
       )}
     </div>
   )
