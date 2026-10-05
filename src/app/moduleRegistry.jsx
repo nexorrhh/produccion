@@ -2,6 +2,7 @@ import { OperativosPage } from '../modules/operativos/OperativosPage'
 import { BusquedaPersonalPage } from '../modules/busqueda-personal/BusquedaPersonalPage'
 import { PolivalenciaPage } from '../modules/polivalencia/PolivalenciaPage'
 import { AuditoriaPage } from '../modules/auditoria/AuditoriaPage'
+import { PlantelPage } from '../modules/plantel/PlantelPage'
 
 // Registro central de módulos habilitados. Agregar o sacar un módulo del
 // panel es agregar/sacar una entrada acá — no hay que tocar Sidebar,
@@ -27,6 +28,15 @@ export const moduleRegistry = [
     label: 'Polivalencia',
     path: '/polivalencia',
     element: <PolivalenciaPage />,
+  },
+  {
+    key: 'plantel',
+    label: 'Plantel',
+    path: '/plantel',
+    element: <PlantelPage />,
+    // Datos de personal (RRHH) solo de consulta — mismo criterio que
+    // Auditoría y Búsqueda de Personal.
+    roles: ['gerente_produccion', 'admin_sistema'],
   },
   {
     key: 'auditoria',
