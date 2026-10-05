@@ -31,10 +31,14 @@ export function ResumenPlantel({ empleados, mapaClasif }) {
         const g = porPuesto.get(nombre)
         if (e.empresa === 'CIMOMET') g.cimomet++
         else g.comoing++
-        g.personas.push(e.apellido_y_nombre)
+        g.personas.push({ nombre: e.apellido_y_nombre, empresa: e.empresa })
       })
       const puestos = [...porPuesto.values()]
-        .map((p) => ({ ...p, total: p.cimomet + p.comoing, personas: [...p.personas].sort((a, b) => a.localeCompare(b)) }))
+        .map((p) => ({
+          ...p,
+          total: p.cimomet + p.comoing,
+          personas: [...p.personas].sort((a, b) => a.nombre.localeCompare(b.nombre)),
+        }))
         .sort((a, b) => b.total - a.total)
       return { ...t, items, puestos }
     }).filter((g) => g.items.length)
@@ -129,7 +133,7 @@ export function ResumenPlantel({ empleados, mapaClasif }) {
           </h3>
           <div className="pl-sector-puestos">
             {g.puestos.map((p) => (
-              <div className="pl-sector-fila" key={p.nombre} title={p.nombre + ' (' + p.total + ')\n' + p.personas.join('\n')}>
+              <div className="pl-sector-fila" key={p.nombre}>
                 <div className="pl-sector-fila-header">
                   <span>{p.nombre}</span>
                   <b>{p.total}</b>
@@ -139,16 +143,29 @@ export function ResumenPlantel({ empleados, mapaClasif }) {
                     <div
                       className="pl-sector-seg pl-sector-seg-cim"
                       style={{ width: (p.cimomet / p.total) * 100 + '%' }}
-                      title={`Cimomet: ${p.cimomet}`}
                     />
                   )}
                   {p.comoing > 0 && (
                     <div
                       className="pl-sector-seg pl-sector-seg-com"
                       style={{ width: (p.comoing / p.total) * 100 + '%' }}
-                      title={`Co.mo.ing: ${p.comoing}`}
                     />
                   )}
+                </div>
+
+                <div className="pl-sector-tooltip">
+                  <div className="pl-sector-tooltip-header">
+                    <span>{p.nombre}</span>
+                    <b>{p.total}</b>
+                  </div>
+                  <ul className="pl-sector-tooltip-lista">
+                    {p.personas.map((per) => (
+                      <li key={per.empresa + '|' + per.nombre}>
+                        <span className={'pl-sector-tooltip-dot ' + (per.empresa === 'CIMOMET' ? 'cim' : 'com')} />
+                        {per.nombre}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             ))}
