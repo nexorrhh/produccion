@@ -131,9 +131,10 @@ export function Indicadores({ horasMensual, tardanzas, ausentismoTipo, empleados
   const [empresa, setEmpresa] = useState('')
   const periodo = periodoSel || periodos[0] || ''
 
+  const basePeriodo = useMemo(() => horasMensual.filter((f) => f.periodo === periodo), [horasMensual, periodo])
   const delPeriodo = useMemo(
-    () => horasMensual.filter((f) => f.periodo === periodo).filter((f) => !empresa || f.empresa === empresa),
-    [horasMensual, periodo, empresa]
+    () => basePeriodo.filter((f) => !empresa || f.empresa === empresa),
+    [basePeriodo, empresa]
   )
   const tardanzasDelPeriodo = useMemo(
     () => tardanzas.filter((t) => t.periodo === periodo).filter((t) => !empresa || t.empresa === empresa),
@@ -168,13 +169,13 @@ export function Indicadores({ horasMensual, tardanzas, ausentismoTipo, empleados
         </select>
         <div className="hp-pills">
           <button className={empresa === '' ? 'active' : ''} onClick={() => setEmpresa('')}>
-            Todos
+            Todos <b>{basePeriodo.length}</b>
           </button>
           <button className={empresa === 'CIMOMET' ? 'active' : ''} onClick={() => setEmpresa('CIMOMET')}>
-            Cimomet
+            Cimomet <b>{basePeriodo.filter((f) => f.empresa === 'CIMOMET').length}</b>
           </button>
           <button className={empresa === 'COMOING' ? 'active' : ''} onClick={() => setEmpresa('COMOING')}>
-            Co.mo.ing
+            Co.mo.ing <b>{basePeriodo.filter((f) => f.empresa === 'COMOING').length}</b>
           </button>
         </div>
       </div>

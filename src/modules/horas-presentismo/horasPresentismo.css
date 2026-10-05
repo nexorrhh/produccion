@@ -361,6 +361,58 @@
 .hp-novedad-detalle {
   color: var(--text2);
 }
+.hp-novedad-fecha-chip {
+  font-size: 10.5px;
+  color: var(--text3);
+  background: var(--bg-soft);
+  border-radius: 10px;
+  padding: 1px 7px;
+}
+
+/* Novedades — tarjetas colapsables */
+.hp-seccion-colapsable {
+  padding: 0;
+  overflow: hidden;
+}
+.hp-seccion-header-clic {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 16px 18px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+.hp-seccion-header-clic:disabled {
+  cursor: default;
+}
+.hp-seccion-titulo-colapsable {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+.hp-seccion-titulo-colapsable b {
+  color: var(--com);
+}
+.hp-seccion-titulo-colapsable b.hp-cero {
+  color: var(--text3);
+}
+.hp-chevron {
+  color: var(--text3);
+  transition: transform 0.15s ease;
+}
+.hp-chevron.abierto {
+  transform: rotate(180deg);
+}
+.hp-seccion-colapsable .hp-vacio-chico {
+  padding: 0 18px 16px;
+}
+.hp-seccion-colapsable .hp-novedad-grupos {
+  padding: 0 18px 16px;
+}
 
 /* Por persona / Ficha */
 .hp-input-busqueda {
@@ -407,6 +459,84 @@
 .hp-dia-horas {
   font-size: 9.5px;
   color: var(--text2);
+}
+
+/* KPIs de persona (detalle diario) */
+.hp-kpis-persona {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.hp-kpi-persona {
+  background: var(--bg-soft);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.hp-kpi-persona-valor {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+}
+.hp-kpi-persona-extra .hp-kpi-persona-valor {
+  color: #7c3aed;
+}
+.hp-kpi-persona-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text2);
+  margin-top: 2px;
+}
+.hp-kpi-persona-sub {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 2px;
+}
+
+/* Leyenda de estados diarios */
+.hp-leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.hp-leyenda-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  border: 1px solid;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--surface);
+}
+
+/* Tabla de detalle diario completa */
+.hp-tabla-dias {
+  margin-top: 16px;
+}
+.hp-dia-motivo {
+  color: var(--text3);
+  font-size: 11.5px;
+}
+.hp-ot-bar-celda {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 140px;
+}
+.hp-ot-bar-track {
+  flex: 1;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--bg-soft);
+  overflow: hidden;
+}
+.hp-ot-bar-fill {
+  height: 100%;
+  background: var(--text);
+  border-radius: 5px;
 }
 
 /* Ficha */

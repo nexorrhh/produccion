@@ -12,10 +12,12 @@ const COLUMNAS =
 // Horas, Indicadores, Por persona, Novedades y Ficha.
 export function useHorasMensual() {
   const [filas, setFilas] = useState([])
+  const [cargando, setCargando] = useState(true)
 
   useEffect(() => {
     let cancelled = false
     async function load() {
+      setCargando(true)
       try {
         const data = await fetchTodasLasFilas('rrhh_horas_mensual', COLUMNAS, 'periodo')
         if (cancelled) return
@@ -23,6 +25,8 @@ export function useHorasMensual() {
       } catch {
         // Cruce de Horas simplemente queda vacío de este lado si falla;
         // el banner de estado ya lo reporta useHorasOtDetalle.
+      } finally {
+        if (!cancelled) setCargando(false)
       }
     }
     load()
@@ -31,5 +35,5 @@ export function useHorasMensual() {
     }
   }, [])
 
-  return { filas }
+  return { filas, cargando }
 }

@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { fmtPeriodo, nombreEmpresa } from '../lib/periodo'
+import { tipoPuesto } from '../lib/clasificacionPuesto'
 import { calcularIndicadores } from '../lib/calculoIndicadores'
-import { agruparDetallePorDia } from '../lib/estadoDia'
+import { construirDetalleDiario } from '../lib/estadoDia'
 import { KpisBloque } from './KpisBloque'
 import { DetalleDiario } from './PorPersona'
 
@@ -13,7 +14,7 @@ function norm(s) {
 // vez) — mismo cálculo de KPIs que Indicadores (lib/calculoIndicadores.js),
 // aplicado a una sola persona o a la selección. No incluye exportación a
 // PDF del original (queda para una próxima vuelta si hace falta).
-export function Ficha({ horasMensual, horasDetalle, tardanzas, empleados }) {
+export function Ficha({ horasMensual, horasDetalle, horasOt, tardanzas, mapaCategoriaAusencia, empleados, mapaClasif }) {
   const periodos = useMemo(() => [...new Set(horasMensual.map((f) => f.periodo))].sort().reverse(), [horasMensual])
   const [periodoSel, setPeriodoSel] = useState('')
   const periodo = periodoSel || periodos[0] || ''
@@ -47,8 +48,17 @@ export function Ficha({ horasMensual, horasDetalle, tardanzas, empleados }) {
 
   const diasIndividual = useMemo(() => {
     if (!filaIndividual) return []
-    return agruparDetallePorDia(horasDetalle.filter((f) => f.legajo === filaIndividual.legajo && f.periodo === periodo))
-  }, [filaIndividual, horasDetalle, periodo])
+    const esMensual = empleadoIndividual ? tipoPuesto(empleadoIndividual.desc_puesto, mapaClasif) === 'mensual' : false
+    return construirDetalleDiario({
+      periodo,
+      legajo: filaIndividual.legajo,
+      horasDetalle: horasDetalle.filter((f) => f.legajo === filaIndividual.legajo && f.periodo === periodo),
+      horasOt,
+      tardanzas: tardanzasDelPeriodo.filter((t) => t.empresa === filaIndividual.empresa),
+      esMensual,
+      mapaCategoriaAusencia,
+    })
+  }, [filaIndividual, empleadoIndividual, horasDetalle, horasOt, tardanzasDelPeriodo, periodo, mapaClasif, mapaCategoriaAusencia])
 
   const empleadosSector = useMemo(
     () => (sectorSel ? empleados.filter((e) => e.desc_puesto === sectorSel) : []),
@@ -141,8 +151,13 @@ export function Ficha({ horasMensual, horasDetalle, tardanzas, empleados }) {
           ) : (
             <div className="hp-seccion">
               <h3 className="hp-seccion-titulo">
-                {empleadoIndividual?.apellido_y_nombre || filaIndividual.apellido + ', ' + filaIndividual.nombre} —{' '}
+                {empleadoIndividual?.apellido_y_nombre || filaIndividual.apellido + ', ' + filaIndividual.nombre} ·{' '}
                 {fmtPeriodo(periodo)}
+                {empleadoIndividual &&
+                  (() => {
+                    const t = tipoPuesto(empleadoIndividual.desc_puesto, mapaClasif)
+                    return <> · {t === 'mensual' ? 'Mensual' : t === 'quincenal' ? 'Quincenal' : 'Sin clasificar'}</>
+                  })()}
               </h3>
               <KpisBloque kpis={kpisIndividual} />
               <DetalleDiario dias={diasIndividual} />

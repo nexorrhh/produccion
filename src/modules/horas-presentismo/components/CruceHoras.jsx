@@ -106,13 +106,13 @@ export function CruceHoras({ filasOt, horasMensual, empleados, mapaClasif }) {
         </select>
         <div className="hp-pills">
           <button className={empresa === '' ? 'active' : ''} onClick={() => setEmpresa('')}>
-            Todos
+            Todos <b>{delPeriodo.length}</b>
           </button>
           <button className={empresa === 'CIMOMET' ? 'active' : ''} onClick={() => setEmpresa('CIMOMET')}>
-            Cimomet
+            Cimomet <b>{delPeriodo.filter((f) => f.empresa === 'CIMOMET').length}</b>
           </button>
           <button className={empresa === 'COMOING' ? 'active' : ''} onClick={() => setEmpresa('COMOING')}>
-            Co.mo.ing
+            Co.mo.ing <b>{delPeriodo.filter((f) => f.empresa === 'COMOING').length}</b>
           </button>
         </div>
         <div className="hp-pills">

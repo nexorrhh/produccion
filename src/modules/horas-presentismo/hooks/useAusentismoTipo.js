@@ -6,13 +6,19 @@ import { supabase } from '../../../app/supabaseClient'
 // novedad.
 export function useAusentismoTipo() {
   const [filas, setFilas] = useState([])
+  const [cargando, setCargando] = useState(true)
 
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const { data } = await supabase.from('v_ausentismo_tipo').select('periodo,tipo,hs_total')
-      if (cancelled) return
-      setFilas(data || [])
+      setCargando(true)
+      try {
+        const { data } = await supabase.from('v_ausentismo_tipo').select('periodo,tipo,hs_total')
+        if (cancelled) return
+        setFilas(data || [])
+      } finally {
+        if (!cancelled) setCargando(false)
+      }
     }
     load()
     return () => {
@@ -20,5 +26,5 @@ export function useAusentismoTipo() {
     }
   }, [])
 
-  return { filas }
+  return { filas, cargando }
 }

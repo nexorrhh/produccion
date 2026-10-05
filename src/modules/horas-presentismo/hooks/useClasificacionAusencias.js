@@ -6,15 +6,21 @@ import { supabase } from '../../../app/supabaseClient'
 // (Parametrización). Acá solo se consulta para mostrar la categoría.
 export function useClasificacionAusencias() {
   const [mapaCategoria, setMapaCategoria] = useState(new Map())
+  const [cargando, setCargando] = useState(true)
 
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const { data } = await supabase.from('rrhh_justificacion_config').select('codigo_justificacion,categoria')
-      if (cancelled) return
-      const mapa = new Map()
-      ;(data || []).forEach((f) => mapa.set(f.codigo_justificacion, f.categoria))
-      setMapaCategoria(mapa)
+      setCargando(true)
+      try {
+        const { data } = await supabase.from('rrhh_justificacion_config').select('codigo_justificacion,categoria')
+        if (cancelled) return
+        const mapa = new Map()
+        ;(data || []).forEach((f) => mapa.set(f.codigo_justificacion, f.categoria))
+        setMapaCategoria(mapa)
+      } finally {
+        if (!cancelled) setCargando(false)
+      }
     }
     load()
     return () => {
@@ -22,7 +28,7 @@ export function useClasificacionAusencias() {
     }
   }, [])
 
-  return mapaCategoria
+  return { mapaCategoria, cargando }
 }
 
 export function categoriaAusencia(codigo, mapaCategoria) {

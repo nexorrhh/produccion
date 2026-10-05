@@ -36,13 +36,25 @@ const TABS = [
 export function HorasPresentismoPage() {
   const [vista, setVista] = useState('indicadores')
   const { filas: filasOt, status, statusText } = useHorasOtDetalle()
-  const { filas: horasMensual } = useHorasMensual()
-  const { filas: horasDetalle } = useHorasDetalle()
-  const { filas: tardanzas } = useTardanzasSalidas()
-  const { filas: ausentismoTipo } = useAusentismoTipo()
-  const mapaCategoriaAusencia = useClasificacionAusencias()
-  const { empleados } = useEmpleadosHP()
+  const { filas: horasMensual, cargando: cargandoHorasMensual } = useHorasMensual()
+  const { filas: horasDetalle, cargando: cargandoHorasDetalle } = useHorasDetalle()
+  const { filas: tardanzas, cargando: cargandoTardanzas } = useTardanzasSalidas()
+  const { filas: ausentismoTipo, cargando: cargandoAusentismoTipo } = useAusentismoTipo()
+  const { mapaCategoria: mapaCategoriaAusencia, cargando: cargandoCategoriaAusencia } = useClasificacionAusencias()
+  const { empleados, cargando: cargandoEmpleados } = useEmpleadosHP()
   const mapaClasif = useClasificacionPuestosHP()
+
+  // Un solo gate de carga para todo el módulo: cada pestaña cruza varias
+  // de estas fuentes a la vez, así que mostrar el spinner recién cuando
+  // TODAS terminaron evita pantallas a medio cargar que parecen "sin
+  // datos" sin serlo.
+  const cargandoTodo =
+    cargandoHorasMensual ||
+    cargandoHorasDetalle ||
+    cargandoTardanzas ||
+    cargandoAusentismoTipo ||
+    cargandoCategoriaAusencia ||
+    cargandoEmpleados
 
   return (
     <div className="wrap">
@@ -54,7 +66,7 @@ export function HorasPresentismoPage() {
         ))}
       </div>
 
-      {status === 'loading' ? (
+      {status === 'loading' || cargandoTodo ? (
         <Loader texto="Cargando horas…" />
       ) : status === 'error' ? (
         <div className="hp-error-banner">{statusText}</div>
@@ -87,9 +99,25 @@ export function HorasPresentismoPage() {
                 mapaCategoriaAusencia={mapaCategoriaAusencia}
               />
             ) : vista === 'personas' ? (
-              <PorPersona horasMensual={horasMensual} horasDetalle={horasDetalle} empleados={empleados} mapaClasif={mapaClasif} />
+              <PorPersona
+                horasMensual={horasMensual}
+                horasDetalle={horasDetalle}
+                horasOt={filasOt}
+                tardanzas={tardanzas}
+                mapaCategoriaAusencia={mapaCategoriaAusencia}
+                empleados={empleados}
+                mapaClasif={mapaClasif}
+              />
             ) : (
-              <Ficha horasMensual={horasMensual} horasDetalle={horasDetalle} tardanzas={tardanzas} empleados={empleados} />
+              <Ficha
+                horasMensual={horasMensual}
+                horasDetalle={horasDetalle}
+                horasOt={filasOt}
+                tardanzas={tardanzas}
+                mapaCategoriaAusencia={mapaCategoriaAusencia}
+                empleados={empleados}
+                mapaClasif={mapaClasif}
+              />
             )}
           </div>
         </>

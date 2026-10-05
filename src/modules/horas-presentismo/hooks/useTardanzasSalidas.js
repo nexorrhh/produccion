@@ -9,16 +9,20 @@ const COLUMNAS =
 // persona y Ficha.
 export function useTardanzasSalidas() {
   const [filas, setFilas] = useState([])
+  const [cargando, setCargando] = useState(true)
 
   useEffect(() => {
     let cancelled = false
     async function load() {
+      setCargando(true)
       try {
         const data = await fetchTodasLasFilas('rrhh_tardanzas_salidas', COLUMNAS, 'fecha')
         if (cancelled) return
         setFilas(data)
       } catch {
         // se reporta via el status general de useHorasOtDetalle
+      } finally {
+        if (!cancelled) setCargando(false)
       }
     }
     load()
@@ -27,5 +31,5 @@ export function useTardanzasSalidas() {
     }
   }, [])
 
-  return { filas }
+  return { filas, cargando }
 }

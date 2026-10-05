@@ -6,17 +6,23 @@ import { supabase } from '../../../app/supabaseClient'
 // solo para resolver nombre/puesto de un legajo en Horas y Presentismo.
 export function useEmpleadosHP() {
   const [empleados, setEmpleados] = useState([])
+  const [cargando, setCargando] = useState(true)
 
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const { data } = await supabase
-        .from('empleados')
-        .select('legajo,apellido_y_nombre,empresa,desc_puesto')
-        .eq('activo', true)
-        .limit(2000)
-      if (cancelled) return
-      setEmpleados(data || [])
+      setCargando(true)
+      try {
+        const { data } = await supabase
+          .from('empleados')
+          .select('legajo,apellido_y_nombre,empresa,desc_puesto')
+          .eq('activo', true)
+          .limit(2000)
+        if (cancelled) return
+        setEmpleados(data || [])
+      } finally {
+        if (!cancelled) setCargando(false)
+      }
     }
     load()
     return () => {
@@ -24,5 +30,5 @@ export function useEmpleadosHP() {
     }
   }, [])
 
-  return { empleados }
+  return { empleados, cargando }
 }
