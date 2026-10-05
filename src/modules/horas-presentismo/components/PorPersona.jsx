@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { fmtPeriodo, nombreEmpresa } from '../lib/periodo'
 import { tipoPuesto } from '../lib/clasificacionPuesto'
 import {
@@ -235,6 +235,16 @@ export function PorPersona({ horasMensual, horasDetalle, horasOt, tardanzas, map
 
   const filaSel = seleccionado ? filas.find((f) => f.empresa + '|' + f.legajo === seleccionado) : null
 
+  // Con 80+ personas en la tabla, el detalle queda lejos de la fila
+  // clickeada (fuera de la pantalla) — sin este scroll, tocar una fila
+  // arriba de todo parece no hacer nada aunque sí se haya desplegado.
+  const detalleRef = useRef(null)
+  useEffect(() => {
+    if (seleccionado && detalleRef.current) {
+      detalleRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [seleccionado])
+
   const diasSel = useMemo(() => {
     if (!filaSel) return []
     return construirDetalleDiario({
@@ -341,7 +351,7 @@ export function PorPersona({ horasMensual, horasDetalle, horasOt, tardanzas, map
       )}
 
       {filaSel && (
-        <div className="hp-detalle-dia-card">
+        <div className="hp-detalle-dia-card" ref={detalleRef}>
           <h3 className="hp-seccion-titulo">
             Detalle — {filaSel.apellido}, {filaSel.nombre} · {fmtPeriodo(periodo)} ·{' '}
             {filaSel._tipo === 'mensual' ? 'Mensual' : filaSel._tipo === 'quincenal' ? 'Quincenal' : 'Sin clasificar'}
