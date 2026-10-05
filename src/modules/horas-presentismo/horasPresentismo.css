@@ -559,7 +559,6 @@
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.15s ease, transform 0.15s ease;
-  pointer-events: none;
 }
 .hp-ot-bar-track:hover .hp-ot-tooltip {
   opacity: 1;

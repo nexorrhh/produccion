@@ -245,7 +245,6 @@
   visibility: hidden;
   transform: translateY(4px);
   transition: opacity 0.15s ease, transform 0.15s ease;
-  pointer-events: none;
 }
 .pl-sector-fila:hover .pl-sector-tooltip {
   opacity: 1;
