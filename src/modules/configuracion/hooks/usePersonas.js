@@ -40,5 +40,11 @@ export function usePersonas() {
     await recargar()
   }
 
-  return { personas, cargando, recargar, crear, actualizar }
+  async function eliminar(id) {
+    const { error } = await supabase.rpc('produccion_eliminar_persona', { p_id: id })
+    if (error) throw new Error(error.message)
+    await recargar()
+  }
+
+  return { personas, cargando, recargar, crear, actualizar, eliminar }
 }

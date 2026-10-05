@@ -13,7 +13,7 @@ import './configuracion.css'
 //   - Personas: quién existe en produccion_usuarios, con qué rol y perfil.
 export function ConfiguracionPage() {
   const { perfiles, cargando: cargandoPerfiles, guardar, borrar } = usePerfiles()
-  const { personas, cargando: cargandoPersonas, crear, actualizar } = usePersonas()
+  const { personas, cargando: cargandoPersonas, crear, actualizar, eliminar } = usePersonas()
   const [vista, setVista] = useState('perfiles')
   const [toast, setToast] = useState(null)
 
@@ -42,7 +42,14 @@ export function ConfiguracionPage() {
           {vista === 'perfiles' ? (
             <Perfiles perfiles={perfiles} personas={personas} onGuardar={guardar} onBorrar={borrar} mostrarToast={mostrarToast} />
           ) : (
-            <Personas personas={personas} perfiles={perfiles} onCrear={crear} onActualizar={actualizar} mostrarToast={mostrarToast} />
+            <Personas
+              personas={personas}
+              perfiles={perfiles}
+              onCrear={crear}
+              onActualizar={actualizar}
+              onEliminar={eliminar}
+              mostrarToast={mostrarToast}
+            />
           )}
         </div>
       )}

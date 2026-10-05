@@ -4,7 +4,7 @@ import { ROLES } from '../lib/roles'
 
 const PERSONA_VACIA = { nombreApellido: '', rol: 'gerente_produccion', perfilId: '' }
 
-export function Personas({ personas, perfiles, onCrear, onActualizar, mostrarToast }) {
+export function Personas({ personas, perfiles, onCrear, onActualizar, onEliminar, mostrarToast }) {
   const { user } = useAuth()
   const [form, setForm] = useState(null)
 
@@ -45,6 +45,16 @@ export function Personas({ personas, perfiles, onCrear, onActualizar, mostrarToa
     try {
       await onActualizar(persona.id, { rol: persona.rol, perfilId: persona.perfil_id, activo: !persona.activo }, user)
       mostrarToast(persona.activo ? 'Persona desactivada' : 'Persona reactivada', 'ok')
+    } catch (err) {
+      mostrarToast(err.message, 'error')
+    }
+  }
+
+  async function handleEliminar(persona) {
+    if (!confirm(`¿Borrar a "${persona.nombre_apellido}"? Esto no se puede deshacer.`)) return
+    try {
+      await onEliminar(persona.id)
+      mostrarToast('Persona borrada', 'ok')
     } catch (err) {
       mostrarToast(err.message, 'error')
     }
@@ -112,6 +122,7 @@ export function Personas({ personas, perfiles, onCrear, onActualizar, mostrarToa
             <th>Perfil</th>
             <th>PIN</th>
             <th>Activo</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -151,6 +162,13 @@ export function Personas({ personas, perfiles, onCrear, onActualizar, mostrarToa
                   <input type="checkbox" checked={p.activo} onChange={() => handleToggleActivo(p)} />
                   <span>{p.activo ? 'Sí' : 'No'}</span>
                 </label>
+              </td>
+              <td>
+                {p.id !== user?.id && (
+                  <button className="btn btn-ghost cfg-btn-borrar" onClick={() => handleEliminar(p)}>
+                    Eliminar
+                  </button>
+                )}
               </td>
             </tr>
           ))}
