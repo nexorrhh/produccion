@@ -2,7 +2,7 @@
 // Validación + Destinatarios del listado) y pueden aprobar/rechazar
 // citaciones. Todo lo demás (hoy: supervisor_planta) tiene "vista
 // Supervisor" — solo puede armar y guardar la citación de Citar.
-const ROLES_ADMIN = ['gerente_produccion', 'admin_sistema']
+const ROLES_ADMIN = ['gerente_produccion', 'admin_sistema', 'superadmin']
 
 export function esVistaAdmin(user) {
   return ROLES_ADMIN.includes(user?.rol)

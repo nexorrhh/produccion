@@ -1,0 +1,232 @@
+/* Autocontenido a propósito (mismo criterio que el resto de los módulos):
+   no depende de clases definidas en otros módulos. */
+
+.cfg-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.cfg-tabs > button {
+  padding: 9px 16px;
+  border: none;
+  background: transparent;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text2);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.cfg-tabs > button:hover {
+  color: var(--text);
+}
+.cfg-tabs > button.active {
+  color: var(--com);
+  border-bottom-color: var(--com);
+}
+
+.cfg-seccion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.cfg-seccion-sub {
+  font-size: 13px;
+  color: var(--text2);
+}
+
+/* Formulario (perfil / persona nueva) */
+.cfg-form-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.cfg-form-titulo {
+  font-size: 14px;
+  font-weight: 700;
+}
+.cfg-label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+}
+.cfg-input {
+  padding: 9px 12px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  font-size: 13.5px;
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 400;
+}
+.cfg-checklist-grupo + .cfg-checklist-grupo {
+  margin-top: 8px;
+}
+.cfg-checklist-grupo-titulo {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.cfg-checklist {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 6px 12px;
+  background: var(--bg-soft);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+.cfg-check-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+.cfg-form-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* Perfiles — grilla de tarjetas */
+.cfg-perfiles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+.cfg-perfil-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 16px 18px;
+}
+.cfg-perfil-card-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.cfg-perfil-card-header h3 {
+  font-size: 14.5px;
+  font-weight: 700;
+}
+.cfg-perfil-personas-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text3);
+  white-space: nowrap;
+}
+.cfg-perfil-desc {
+  font-size: 12.5px;
+  color: var(--text2);
+  margin-bottom: 10px;
+}
+.cfg-perfil-modulos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.cfg-chip {
+  display: inline-flex;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--com-bg);
+  color: var(--com);
+  border: 1px solid var(--com-border);
+}
+.cfg-chip-vacio {
+  font-size: 11.5px;
+  color: var(--text3);
+  font-style: italic;
+}
+.cfg-perfil-acciones {
+  display: flex;
+  gap: 8px;
+}
+.cfg-btn-borrar {
+  color: var(--red);
+}
+
+/* Personas — tabla */
+.cfg-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.cfg-tabla th {
+  text-align: left;
+  padding: 9px 12px;
+  color: var(--text2);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-soft);
+}
+.cfg-tabla td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.cfg-tabla tbody tr:last-child td {
+  border-bottom: none;
+}
+.cfg-fila-inactiva {
+  opacity: 0.5;
+}
+.cfg-select-chico {
+  padding: 6px 9px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  font-size: 12.5px;
+  background: var(--surface);
+  color: var(--text);
+}
+.cfg-badge-pin {
+  display: inline-flex;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--amber-bg);
+  color: var(--amber);
+}
+.cfg-badge-pin.definido {
+  background: var(--green-bg);
+  color: var(--green);
+}
+.cfg-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
