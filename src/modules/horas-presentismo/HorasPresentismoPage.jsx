@@ -93,7 +93,7 @@ export function HorasPresentismoPage() {
               <Novedades
                 tardanzas={tardanzas}
                 horasDetalle={horasDetalle}
-                horasMensual={horasMensual}
+                horasOt={filasOt}
                 empleados={empleados}
                 mapaClasif={mapaClasif}
                 mapaCategoriaAusencia={mapaCategoriaAusencia}

@@ -23,7 +23,15 @@ export function Ficha({ horasMensual, horasDetalle, horasOt, tardanzas, mapaCate
   const [busqueda, setBusqueda] = useState('')
   const [legajoSel, setLegajoSel] = useState(null)
 
-  const sectores = useMemo(() => [...new Set(empleados.map((e) => e.desc_puesto).filter(Boolean))].sort(), [empleados])
+  // El modo Grupo/Sector es para comparar equipos de HOY (ej. "todo el
+  // sector Armado") — ahí sí tiene sentido limitarlo a gente activa,
+  // aunque `empleados` traiga también a quienes ya no están (para que la
+  // búsqueda individual pueda encontrar a cualquiera históricamente).
+  const empleadosActivos = useMemo(() => empleados.filter((e) => e.activo), [empleados])
+  const sectores = useMemo(
+    () => [...new Set(empleadosActivos.map((e) => e.desc_puesto).filter(Boolean))].sort(),
+    [empleadosActivos]
+  )
   const [sectorSel, setSectorSel] = useState('')
   const [seleccionGrupo, setSeleccionGrupo] = useState(new Set())
 
@@ -61,8 +69,8 @@ export function Ficha({ horasMensual, horasDetalle, horasOt, tardanzas, mapaCate
   }, [filaIndividual, empleadoIndividual, horasDetalle, horasOt, tardanzasDelPeriodo, periodo, mapaClasif, mapaCategoriaAusencia])
 
   const empleadosSector = useMemo(
-    () => (sectorSel ? empleados.filter((e) => e.desc_puesto === sectorSel) : []),
-    [sectorSel, empleados]
+    () => (sectorSel ? empleadosActivos.filter((e) => e.desc_puesto === sectorSel) : []),
+    [sectorSel, empleadosActivos]
   )
 
   function toggleGrupo(clave) {
@@ -138,6 +146,7 @@ export function Ficha({ horasMensual, horasDetalle, horasOt, tardanzas, mapaCate
                     }}
                   >
                     {e.apellido_y_nombre} — {nombreEmpresa(e.empresa)} · {e.desc_puesto || 'Sin puesto'}
+                    {!e.activo && <span className="hp-novedad-empresa"> · inactivo</span>}
                   </li>
                 ))}
               </ul>
@@ -187,7 +196,7 @@ export function Ficha({ horasMensual, horasDetalle, horasOt, tardanzas, mapaCate
             </div>
 
             <div className="hp-ficha-checklist">
-              {empleados.map((e) => {
+              {empleadosActivos.map((e) => {
                 const clave = e.empresa + '|' + e.legajo
                 return (
                   <label key={clave} className="hp-ficha-check-item">

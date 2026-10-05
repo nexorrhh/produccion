@@ -59,7 +59,7 @@ const GRUPOS = [
 // larguísima. No incluye el sub-modo "Chequeo del día (fichadas)" del
 // original porque implica subir un archivo del reloj biométrico (carga de
 // datos, fuera de alcance de este módulo).
-export function Novedades({ tardanzas, horasDetalle, horasMensual, empleados, mapaClasif, mapaCategoriaAusencia }) {
+export function Novedades({ tardanzas, horasDetalle, horasOt, empleados, mapaClasif, mapaCategoriaAusencia }) {
   const [modo, setModo] = useState('dia') // dia | semana
   const [fecha, setFecha] = useState(hoyISO)
   const [expandidos, setExpandidos] = useState(() => new Set())
@@ -97,42 +97,38 @@ export function Novedades({ tardanzas, horasDetalle, horasMensual, empleados, ma
   }, [empleados])
 
   // rrhh_horas_detalle no trae columna `empresa` confiable (ver
-  // useHorasDetalle.js) — para esas filas se resuelve por legajo solo
-  // cuando no hay ambigüedad entre Cimomet/Co.mo.ing.
-  function resolver(legajo, empresa) {
-    if (empresa) {
-      const e = empleadosPorLegajoEmpresa.get(empresa + '|' + legajo)
-      if (e) return e
+  // useHorasDetalle.js) — para esas filas (Horas extra) hay que resolver
+  // persona por otro camino. `empleados` incluye también gente inactiva
+  // (para poder nombrar a alguien que ya no trabaja acá en una novedad
+  // vieja), y como Cimomet y Co.mo.ing reutilizan números de legajo entre
+  // sí, el mismo legajo puede tener más de un candidato: se prueba, en
+  // orden, (1) el cruce exacto empresa+legajo cuando la fuente sí trae
+  // empresa (tardanzas), (2) si hay un único legajo en todo el padrón,
+  // (3) si hay un único candidato ACTIVO entre los posibles, y (4) como
+  // último recurso para horas extra, el mismo legajo+fecha en
+  // horas_ot_detalle (Capataz), que sí guarda nombre y empresa sin
+  // ambigüedad por fila.
+  function resolverPersona(legajo, fecha, empresaConocida) {
+    if (empresaConocida) {
+      const e = empleadosPorLegajoEmpresa.get(empresaConocida + '|' + legajo)
+      if (e) return { nombre: e.apellido_y_nombre, empresa: empresaConocida, descPuesto: e.desc_puesto }
     }
     const candidatos = empleadosPorLegajoSolo.get(legajo) || []
-    return candidatos.length === 1 ? candidatos[0] : null
-  }
-  function grupoDe(legajo, empresa) {
-    const e = resolver(legajo, empresa)
-    return e ? tipoPuesto(e.desc_puesto, mapaClasif) : 'sin_asignar'
-  }
-  function nombreDe(legajo, empresa) {
-    const e = resolver(legajo, empresa)
-    return e ? e.apellido_y_nombre : 'Legajo ' + legajo
+    if (candidatos.length === 1) {
+      return { nombre: candidatos[0].apellido_y_nombre, empresa: candidatos[0].empresa, descPuesto: candidatos[0].desc_puesto }
+    }
+    const activos = candidatos.filter((c) => c.activo)
+    if (activos.length === 1) {
+      return { nombre: activos[0].apellido_y_nombre, empresa: activos[0].empresa, descPuesto: activos[0].desc_puesto }
+    }
+    const otMatch = horasOt.find((h) => h.legajo === legajo && h.fecha === fecha)
+    if (otMatch) return { nombre: otMatch.nombre, empresa: otMatch.empresa, descPuesto: null }
+    return null
   }
 
   const enRango = (f) => f.fecha >= desde && f.fecha <= hasta
 
   const tardanzasRango = useMemo(() => tardanzas.filter(enRango), [tardanzas, desde, hasta])
-
-  const periodoRango = fecha.slice(0, 7)
-  const empresaPorLegajoPeriodo = useMemo(() => {
-    const mapa = new Map()
-    horasMensual
-      .filter((f) => f.periodo === periodoRango)
-      .forEach((f) => mapa.set(f.legajo, (mapa.get(f.legajo) || new Set()).add(f.empresa)))
-    return mapa
-  }, [horasMensual, periodoRango])
-
-  function empresaDetalle(legajo) {
-    const set = empresaPorLegajoPeriodo.get(legajo)
-    return set && set.size === 1 ? [...set][0] : null
-  }
 
   const extrasRango = useMemo(
     () => horasDetalle.filter((f) => enRango(f) && esHoraExtra(f) && Number(f.hs_reales || f.hs_trabajadas || 0) > 0),
@@ -142,9 +138,13 @@ export function Novedades({ tardanzas, horasDetalle, horasMensual, empleados, ma
   function agrupar(lista, empresaKey) {
     const porGrupo = { quincenal: [], mensual: [], sin_asignar: [] }
     lista.forEach((f) => {
-      const empresa = empresaKey ? f[empresaKey] : empresaDetalle(f.legajo)
-      const g = grupoDe(f.legajo, empresa)
-      porGrupo[g].push({ ...f, _empresaResuelta: empresa })
+      const persona = resolverPersona(f.legajo, f.fecha, empresaKey ? f[empresaKey] : null)
+      const grupo = persona ? tipoPuesto(persona.descPuesto, mapaClasif) : 'sin_asignar'
+      porGrupo[grupo].push({
+        ...f,
+        _nombreResuelto: persona ? persona.nombre : 'Legajo ' + f.legajo,
+        _empresaResuelta: persona ? persona.empresa : null,
+      })
     })
     return porGrupo
   }
@@ -191,7 +191,6 @@ export function Novedades({ tardanzas, horasDetalle, horasMensual, empleados, ma
         clave="faltas"
         titulo="Faltas"
         porGrupo={faltasPorGrupo}
-        nombreDe={nombreDe}
         expandido={expandidos.has('faltas')}
         onToggle={() => toggleExpandido('faltas')}
         render={(t) => (
@@ -202,7 +201,6 @@ export function Novedades({ tardanzas, horasDetalle, horasMensual, empleados, ma
         clave="tarde"
         titulo="Llegadas tarde"
         porGrupo={tardePorGrupo}
-        nombreDe={nombreDe}
         expandido={expandidos.has('tarde')}
         onToggle={() => toggleExpandido('tarde')}
         render={(t) => <>{t.minutos ? `${t.minutos} min` : ''}</>}
@@ -211,7 +209,6 @@ export function Novedades({ tardanzas, horasDetalle, horasMensual, empleados, ma
         clave="temprano"
         titulo="Salidas anticipadas"
         porGrupo={tempranoPorGrupo}
-        nombreDe={nombreDe}
         expandido={expandidos.has('temprano')}
         onToggle={() => toggleExpandido('temprano')}
         render={(t) => <>{t.minutos ? `${t.minutos} min` : ''}</>}
@@ -220,7 +217,6 @@ export function Novedades({ tardanzas, horasDetalle, horasMensual, empleados, ma
         clave="extra"
         titulo="Horas extra"
         porGrupo={extraPorGrupo}
-        nombreDe={nombreDe}
         expandido={expandidos.has('extra')}
         onToggle={() => toggleExpandido('extra')}
         render={(f) => (
@@ -233,7 +229,7 @@ export function Novedades({ tardanzas, horasDetalle, horasMensual, empleados, ma
   )
 }
 
-function BloqueNovedad({ titulo, porGrupo, nombreDe, render, expandido, onToggle }) {
+function BloqueNovedad({ titulo, porGrupo, render, expandido, onToggle }) {
   const total = porGrupo.quincenal.length + porGrupo.mensual.length + porGrupo.sin_asignar.length
   return (
     <div className="hp-seccion hp-seccion-colapsable">
@@ -258,7 +254,7 @@ function BloqueNovedad({ titulo, porGrupo, nombreDe, render, expandido, onToggle
                 <ul className="hp-novedad-lista">
                   {items.map((it, i) => (
                     <li key={i}>
-                      <span className="hp-novedad-nombre">{nombreDe(it.legajo, it._empresaResuelta)}</span>
+                      <span className="hp-novedad-nombre">{it._nombreResuelto}</span>
                       {it._empresaResuelta && <span className="hp-novedad-empresa">{nombreEmpresa(it._empresaResuelta)}</span>}
                       <span className="hp-novedad-fecha-chip">{it.fecha.slice(8, 10)}/{it.fecha.slice(5, 7)}</span>
                       <span className="hp-novedad-detalle">{render(it)}</span>
