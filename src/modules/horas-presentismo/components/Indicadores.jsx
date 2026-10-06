@@ -1,15 +1,7 @@
 import { useMemo, useState } from 'react'
-import { fmtPeriodo, nombreEmpresa } from '../lib/periodo'
+import { fmtPeriodo } from '../lib/periodo'
 import { tipoPuesto } from '../lib/clasificacionPuesto'
-import {
-  calcularIndicadores,
-  pctPresentismo,
-  pctCumplimientoHoras,
-  pctAusentismo,
-  colorAusentismo,
-  fmtPct,
-  fmtHoras,
-} from '../lib/calculoIndicadores'
+import { calcularIndicadores, fmtHoras } from '../lib/calculoIndicadores'
 import { KpisBloque } from './KpisBloque'
 
 const SECCIONES = [
@@ -17,102 +9,17 @@ const SECCIONES = [
   { key: 'mensual', label: 'Mensuales (administrativo)' },
 ]
 
-function SeccionIndicadores({ titulo, filas, kpis, tardanzasSeccion }) {
-  const [orden, setOrden] = useState({ key: 'pctAusentismo', dir: 'desc' })
-
-  const tardanzasPorLegajo = useMemo(() => {
-    const mapa = new Map()
-    tardanzasSeccion.forEach((t) => {
-      const clave = t.empresa + '|' + t.legajo
-      if (!mapa.has(clave)) mapa.set(clave, { tarde: 0, temprano: 0 })
-      const c = mapa.get(clave)
-      if (t.tipo === 'tarde') c.tarde++
-      else if (t.tipo === 'temprano') c.temprano++
-    })
-    return mapa
-  }, [tardanzasSeccion])
-
-  const filasCalc = useMemo(() => {
-    return filas.map((f) => {
-      const t = tardanzasPorLegajo.get(f.empresa + '|' + f.legajo) || { tarde: 0, temprano: 0 }
-      return {
-        ...f,
-        pctPresentismo: pctPresentismo(f),
-        pctCumplimiento: pctCumplimientoHoras(f),
-        pctAusentismo: pctAusentismo(f),
-        tardanzas: t.tarde,
-        salidasAnticipadas: t.temprano,
-      }
-    })
-  }, [filas, tardanzasPorLegajo])
-
-  function toggleOrden(key) {
-    setOrden((o) => (o.key === key ? { key, dir: o.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'desc' }))
-  }
-
-  const ordenadas = useMemo(() => {
-    const dir = orden.dir === 'asc' ? 1 : -1
-    return [...filasCalc].sort((a, b) => {
-      const va = a[orden.key]
-      const vb = b[orden.key]
-      if (va === null || va === undefined) return 1
-      if (vb === null || vb === undefined) return -1
-      if (typeof va === 'string') return dir * va.localeCompare(vb)
-      return dir * ((va || 0) - (vb || 0))
-    })
-  }, [filasCalc, orden])
-
-  function th(key, label) {
-    return (
-      <th key={key} className="hp-th-ordenable" onClick={() => toggleOrden(key)}>
-        {label} {orden.key === key ? (orden.dir === 'asc' ? '▲' : '▼') : ''}
-      </th>
-    )
-  }
-
+// Solo indicadores generales por sección (Quincenales/Mensuales) — igual
+// que presentismo-indicadores.js de Tablero_RRHH. El desglose por persona
+// vive en la pestaña "Por persona", no acá (evita duplicar la misma
+// tabla en dos pestañas distintas).
+function SeccionIndicadores({ titulo, filas, kpis }) {
   return (
     <div className="hp-seccion">
       <h3 className="hp-seccion-titulo">
         {titulo} ({filas.length})
       </h3>
-      {filas.length === 0 ? (
-        <div className="hp-vacio">Sin personal en esta sección para este período.</div>
-      ) : (
-        <>
-          <KpisBloque kpis={kpis} />
-
-          <table className="hp-tabla">
-            <thead>
-              <tr>
-                {th('apellido', 'Nombre')}
-                <th>Empresa</th>
-                <th>Departamento</th>
-                {th('hs_esperadas', 'Hs. esp.')}
-                {th('hs_normales', 'Hs. norm.')}
-                {th('pctCumplimiento', 'Cumpl.')}
-                {th('pctAusentismo', 'Ausent.')}
-                {th('pctPresentismo', 'Presentismo')}
-                {th('tardanzas', 'Tardanzas')}
-              </tr>
-            </thead>
-            <tbody>
-              {ordenadas.map((f) => (
-                <tr key={f.empresa + '|' + f.legajo}>
-                  <td>{(f.apellido || '') + ', ' + (f.nombre || '')}</td>
-                  <td>{nombreEmpresa(f.empresa)}</td>
-                  <td>{f.departamento || '—'}</td>
-                  <td>{fmtHoras(f.hs_esperadas)}</td>
-                  <td>{fmtHoras(f.hs_normales)}</td>
-                  <td>{fmtPct(f.pctCumplimiento)}</td>
-                  <td style={{ color: colorAusentismo(f.pctAusentismo) }}>{fmtPct(f.pctAusentismo)}</td>
-                  <td>{fmtPct(f.pctPresentismo)}</td>
-                  <td>{f.tardanzas}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
-      )}
+      {filas.length === 0 ? <div className="hp-vacio">Sin personal en esta sección para este período.</div> : <KpisBloque kpis={kpis} />}
     </div>
   )
 }
@@ -185,15 +92,7 @@ export function Indicadores({ horasMensual, tardanzas, ausentismoTipo, empleados
         const legajosSeccion = new Set(filasSeccion.map((f) => f.empresa + '|' + f.legajo))
         const tardanzasSeccion = tardanzasDelPeriodo.filter((t) => legajosSeccion.has(t.empresa + '|' + t.legajo))
         const kpis = calcularIndicadores(filasSeccion, tardanzasSeccion)
-        return (
-          <SeccionIndicadores
-            key={s.key}
-            titulo={s.label}
-            filas={filasSeccion}
-            kpis={kpis}
-            tardanzasSeccion={tardanzasSeccion}
-          />
-        )
+        return <SeccionIndicadores key={s.key} titulo={s.label} filas={filasSeccion} kpis={kpis} />
       })}
 
       <div className="hp-graf-card">
