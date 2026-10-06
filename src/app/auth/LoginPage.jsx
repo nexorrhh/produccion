@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './useAuth'
+import { CompanyLogo } from '../components/CompanyLogo'
 import './login.css'
 
 function iniciales(nombreApellido) {
@@ -10,12 +11,37 @@ function iniciales(nombreApellido) {
   return (a + n).toUpperCase()
 }
 
+function nombreParaSaludo(nombreApellido) {
+  const partes = (nombreApellido || '').split(',').map((s) => s.trim())
+  return (partes[1] || partes[0] || '').split(' ')[0]
+}
+
 export function LoginPage() {
   const { user, listarUsuarios } = useAuth()
   const location = useLocation()
   const [usuarios, setUsuarios] = useState(null)
   const [error, setError] = useState('')
   const [seleccionado, setSeleccionado] = useState(null)
+  const [vista, setVista] = useState('perfiles')
+  const [saliendo, setSaliendo] = useState(false)
+
+  function elegirPersona(usuario) {
+    setSeleccionado(usuario)
+    setVista('pin')
+  }
+
+  function volverAPerfiles() {
+    setVista('perfiles')
+    setSeleccionado(null)
+  }
+
+  async function mostrarBienvenida() {
+    const reducirMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    setVista('bienvenida')
+    await new Promise((resolve) => window.setTimeout(resolve, reducirMovimiento ? 250 : 1450))
+    setSaliendo(true)
+    await new Promise((resolve) => window.setTimeout(resolve, reducirMovimiento ? 50 : 350))
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -33,29 +59,27 @@ export function LoginPage() {
   }
 
   return (
-    <div className="login-screen">
+    <div className={'login-screen' + (saliendo ? ' login-screen-exit' : '')}>
+      <div className="login-ambient login-ambient-one" />
+      <div className="login-ambient login-ambient-two" />
       <div className="login-card">
         <div className="login-brand">
-          <div className="login-brand-mark">
-            <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <rect x="3" y="4" width="18" height="18" rx="2" />
-              <path d="M16 2v4M8 2v4M3 10h18" />
-            </svg>
-          </div>
-          <div>
-            <div className="login-title">Panel de Producción</div>
-            <div className="login-sub">Cimomet S.A. &amp; Co.mo.ing S.R.L.</div>
-          </div>
+          <CompanyLogo />
         </div>
-
-        {error && <div className="login-error">{error}</div>}
-
-        {!seleccionado ? (
-          <PersonGrid usuarios={usuarios} onElegir={setSeleccionado} />
-        ) : seleccionado.tiene_pin ? (
-          <PinEntryForm usuario={seleccionado} onVolver={() => setSeleccionado(null)} />
+        {vista === 'bienvenida' ? (
+          <Bienvenida usuario={seleccionado} />
         ) : (
-          <CrearPinForm usuario={seleccionado} onVolver={() => setSeleccionado(null)} />
+          <div className="login-stage" key={vista}>
+            <div className="login-intro"><span>Portal interno</span><h1>Panel de Producción</h1><p>{vista === 'perfiles' ? 'Seleccioná tu perfil para ingresar al espacio de trabajo.' : 'Ingresá tu clave para continuar.'}</p></div>
+            {error && <div className="login-error">{error}</div>}
+            {vista === 'perfiles' ? (
+              <PersonGrid usuarios={usuarios} onElegir={elegirPersona} />
+            ) : seleccionado.tiene_pin ? (
+              <PinEntryForm usuario={seleccionado} onVolver={volverAPerfiles} onVerified={mostrarBienvenida} />
+            ) : (
+              <CrearPinForm usuario={seleccionado} onVolver={volverAPerfiles} onVerified={mostrarBienvenida} />
+            )}
+          </div>
         )}
       </div>
     </div>
@@ -82,7 +106,7 @@ function PersonGrid({ usuarios, onElegir }) {
   )
 }
 
-function PinEntryForm({ usuario, onVolver }) {
+function PinEntryForm({ usuario, onVolver, onVerified }) {
   const { login } = useAuth()
   const [pin, setPin] = useState('')
   const [error, setError] = useState('')
@@ -97,7 +121,7 @@ function PinEntryForm({ usuario, onVolver }) {
     setLoading(true)
     setError('')
     try {
-      await login(usuario.id, pin)
+      await login(usuario.id, pin, { beforeApply: onVerified })
     } catch (err) {
       setError(err.message)
       setPin('')
@@ -134,7 +158,7 @@ function PinEntryForm({ usuario, onVolver }) {
   )
 }
 
-function CrearPinForm({ usuario, onVolver }) {
+function CrearPinForm({ usuario, onVolver, onVerified }) {
   const { crearPin } = useAuth()
   const [pin, setPin] = useState('')
   const [confirmar, setConfirmar] = useState('')
@@ -154,7 +178,7 @@ function CrearPinForm({ usuario, onVolver }) {
     }
     setLoading(true)
     try {
-      await crearPin(usuario.id, pin)
+      await crearPin(usuario.id, pin, { beforeApply: onVerified })
     } catch (err) {
       setError(err.message)
       setPin('')
@@ -203,6 +227,20 @@ function CrearPinForm({ usuario, onVolver }) {
         {loading ? 'Guardando…' : 'Crear PIN y entrar'}
       </button>
     </form>
+  )
+}
+
+function Bienvenida({ usuario }) {
+  return (
+    <div className="login-welcome" role="status" aria-live="polite">
+      <span className="welcome-check" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="m6 12 4 4 8-9" /></svg>
+      </span>
+      <span className="welcome-eyebrow">Acceso confirmado</span>
+      <h1>Hola, {nombreParaSaludo(usuario?.nombre_apellido)}</h1>
+      <p>Preparando tu espacio de trabajo…</p>
+      <span className="welcome-progress" aria-hidden="true"><i /></span>
+    </div>
   )
 }
 

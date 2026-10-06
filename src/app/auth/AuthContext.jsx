@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
     setLoading(false)
   }, [])
 
-  async function login(id, pin) {
+  async function login(id, pin, options = {}) {
     const { data, error } = await supabase.rpc('produccion_verificar_pin', {
       p_id: id,
       p_pin: pin,
@@ -29,6 +29,7 @@ export function AuthProvider({ children }) {
     if (error) throw new Error('No se pudo validar el PIN: ' + error.message)
     if (!data || !data.length) throw new Error('PIN incorrecto')
 
+    if (options.beforeApply) await options.beforeApply(data[0])
     return applyLogin(data[0])
   }
 
@@ -44,7 +45,7 @@ export function AuthProvider({ children }) {
   // Define el PIN por primera vez para un perfil. La función en Supabase
   // solo lo permite si ese perfil todavía no tiene uno, así cada persona
   // lo elige una única vez, sin que nadie más lo vea ni lo defina.
-  async function crearPin(id, pin) {
+  async function crearPin(id, pin, options = {}) {
     const { data, error } = await supabase.rpc('produccion_crear_pin', {
       p_id: id,
       p_pin: pin,
@@ -52,6 +53,7 @@ export function AuthProvider({ children }) {
     if (error) throw new Error(error.message)
     if (!data || !data.length) throw new Error('No se pudo crear el PIN')
 
+    if (options.beforeApply) await options.beforeApply(data[0])
     return applyLogin(data[0])
   }
 
