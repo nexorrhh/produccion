@@ -19,9 +19,12 @@ const ESTADOS = [
 // (horas_ot_detalle, sin las anómalas). Capataz es la fuente de verdad:
 // toda diferencia se interpreta como un error a revisar en Tango, nunca al
 // revés — mismo criterio que horas-cruce.js de Tablero_RRHH. El personal
-// mensual casi nunca carga OT, así que se excluye del cruce salvo que ese
-// período puntual sí tenga horas cargadas en Capataz (si no, siempre
-// marcaría "sin OT" sin que sea un error real).
+// mensual no usa Capataz como su forma habitual de registrar horas —
+// carga a veces sí, a veces no, de forma inconsistente, así que cualquier
+// comparación contra Tango es ruido y no un error real. Se lo deja afuera
+// del cruce SIEMPRE, incluso en los períodos puntuales donde sí cargó
+// algo en Capataz (confirmado contra el código fuente de Tablero_RRHH:
+// "Se los deja afuera del cruce siempre").
 export function CruceHoras({ filasOt, horasMensual, empleados, mapaClasif }) {
   const empleadosPorLegajo = useMemo(() => {
     const mapa = new Map()
@@ -55,7 +58,7 @@ export function CruceHoras({ filasOt, horasMensual, empleados, mapaClasif }) {
       const emp = empleadosPorLegajo.get(empresa + '|' + legajo)
       const esMensual = emp ? tipoPuesto(emp.desc_puesto, mapaClasif) === 'mensual' : false
 
-      if (esMensual && horasOt === 0) return
+      if (esMensual) return
 
       let estado
       if (horasOt > 0 && horasTango === 0) estado = 'solo_ot'
